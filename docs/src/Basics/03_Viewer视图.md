@@ -49,7 +49,7 @@ const viewer = new Cesium.Viewer(cesiumContainer.value, {
 
 Scene 是 Viewer 的内部对象，管理 WebGL 渲染、相机、光照和几何体绘制
 
-1. 设置背景颜色，cesium 默认是***星系背景***，可自定义更换：
+1. 设置背景颜色，cesium 默认是**_星系背景_**，可自定义更换：
 
 方式一：`需将skybox属性设置为false，否则会覆盖背景颜色`
 
@@ -70,7 +70,7 @@ viewer.scene.backgroundColor = Cesium.Color.SKYBLUE;
 
 ![天空蓝背景](../Aassets/Basics/skyBlueBg.png)
 
-方式三：`自定义天空盒背景图，添加自定义图片`，[官网API](https://cesium.com/learn/cesiumjs/ref-doc/SkyBox.html)
+方式三：`自定义天空盒背景图，添加自定义图片`，[官网 API](https://cesium.com/learn/cesiumjs/ref-doc/SkyBox.html)
 
 ```js
 // 引入图片资源
@@ -92,6 +92,7 @@ viewer.scene.skyBox = new Cesium.SkyBox({
   },
 });
 ```
+
 **参数说明：**
 ![天空盒背景](../Aassets/Basics/skyBoxBg.png)
 
@@ -118,22 +119,25 @@ viewer.scene.debugShowFramesPerSecond = true;
 
 #### 实体添加：
 
-案例请参考[实体添加](./entityAdd.md)
+案例请参考[实体添加](./08_实体.md)
 | 实体类型 | 描述 |
 | --- | --- |
-| 点（Point） | 表示一个点 |
-| 线（Polyline） | 表示一条线 |
-| 面（Polygon） | 表示一个面 |
-| 模型（Model） | 表示一个 3D 模型 |
-| 广告牌（Billboard） | 表示一个 2D 标签 |
-| 路径（Path） | 表示一条经纬度线 |
-| 矩形（Rectangle） | 表示一个矩形 |
-| 椭圆（Ellipse） | 表示一个椭圆 |
-| 椭圆体（Ellipsoid） | 表示一个椭圆体 |
-| 飞机（Plane） | 表示一个飞机 |
-| 墙（Wall） | 表示一个墙 |
-| 走廊（Corridor） | 表示一个走廊 |
-| 锥体（cylinder） | 表示一个锥体 |
+| 点（Point） | 要与此实体关联的点 |
+| 线（Polyline） | 要与此实体关联的多段线 |
+| 多边形（Polygon） | 要与此实体关联的多边形 |
+| 模型（Model） | 要与此实体关联的模型 |
+| 广告牌（Billboard） | 要与此实体关联的公告板 |
+| 箱（Box） | 要与此实体关联的框 |
+| 矩形（Rectangle） | 要与此实体关联的矩形 |
+| 椭圆（Ellipse） | 要与此实体关联的椭圆 |
+| 椭圆体（Ellipsoid） | 要与此实体关联的椭球体 |
+| 标签（Label） | 与此实体关联的标签 |
+| 路径（Path） | 要与此实体关联的路径 |
+| 平面（Plane） | 要与此实体关联的平面 |
+| 墙（Wall） | 要与此实体关联的墙 |
+| 走廊（Corridor） | 要与此实体关联的走廊 |
+| 圆柱体（Cylinder） | 要与此实体关联的圆柱体 |
+| 瓦片集（Tileset） | 要与此实体关联的 3D Tiles 图块集 |
 
 #### GeoJson 数据添加：
 
@@ -181,14 +185,14 @@ const viewer = new Cesium.Viewer("cesiumContainer", {
 ![默认地形](../Aassets/Basics/defaultTerrain.png)
 
 2. `自定义地形数据：`
-（略，待更新...）
+   （略，待更新...）
 
 ### Viewer 常用方法
 
 - `zoomTo(target,offset)`：相机自动调整到指定实体的视野。(实体)
 - `flyTo(target, options)`：相机平滑过渡到指定实体的位置。(实体)
 - `camera.setView(options)`：立即设置相机位置。
-- `camera.flyTo(options)`：相机平滑过渡到指定位置。(注意与flyTo的区别)
+- `camera.flyTo(options)`：相机平滑过渡到指定位置。(注意与 flyTo 的区别)
 - `trackedEntity`：锁定相机视角跟随实体移动（适合动态目标跟踪）
 - `entities.add()`：添加实体到场景。
 - `scene.pick(position)`：根据屏幕坐标拾取场景中的实体。
