@@ -15,16 +15,9 @@ Cesium 是一个强大的开源 JavaScript 库，用于创建基于 Web 的 3D �
    npm install && npm run dev
    ```
 
-2. **项目结构**
-   docs/
-   ├── src/
-   │ ├── Aassets/ # 静态资源
-   │ │
-   │ ├── Basics/ # 基础篇
-   │ │
-   │ ├── Advanced/ # 进阶篇(待完善...)
-   │ │
-   │ ├── Practice/ # 实践篇(待完善...)
+2. **快速预览**
+   - Github-pages预览地址:
+   - GitHub 内快速预览:[https://github.com/YGYong/cesium-start/blob/master/docs/src/Basics/00\_%E7%AE%80%E4%BB%8B.md](https://github.com/YGYong/cesium-start/blob/master/docs/src/Basics/00_%E7%AE%80%E4%BB%8B.md)
 
 ## 联系方式
 
