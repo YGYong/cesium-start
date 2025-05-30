@@ -7,8 +7,9 @@ export default defineConfig({
   srcDir: "src",
   lastUpdated: true,
   themeConfig: {
+    // aside: false,
     outline: {
-      level: 'deep',
+      level: "deep",
       label: "目录",
     },
     // https://vitepress.dev/reference/default-theme-config
@@ -57,7 +58,7 @@ export default defineConfig({
     },
     lastUpdatedText: "最后更新时间",
     search: {
-      provider: 'local'
-    }
+      provider: "local",
+    },
   },
 });
