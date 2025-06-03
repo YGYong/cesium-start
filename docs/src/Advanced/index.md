@@ -14,6 +14,7 @@
 
 1. 优化:primitive
 2. entity 和 scene.primitives 的一些区别
+3. 3dtileset 加载
 
 ## 材质
 

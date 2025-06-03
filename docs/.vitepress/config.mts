@@ -17,6 +17,27 @@ export default defineConfig({
       { text: "基础", link: "/Basics/00_简介.md" },
       { text: "进阶", link: "/Advanced/index.md" },
       { text: "实践", link: "/Practice/00_.md" },
+      {
+        text: "外部链接",
+        items: [
+          {
+            text: "Cesium 官网",
+            link: "https://cesium.com/",
+          },
+          {
+            text: "Cesium API",
+            link: "https://cesium.com/learn/cesiumjs/ref-doc/",
+          },
+          {
+            text: "优秀开源博客(cesium.xin)",
+            link: "http://cesium.xin/",
+          },
+        ],
+      },
+      {
+        text: "更新日志",
+        link: "/UpdateLog/mydocs.md",
+      },
     ],
 
     sidebar: {
@@ -40,8 +61,15 @@ export default defineConfig({
       "/Advanced/": [
         {
           text: "进阶",
+          items: [{ text: "介绍", link: "/Advanced/index.md" }],
+        },
+      ],
+      "/UpdateLog/": [
+        {
+          text: "更新日志",
           items: [
-            { text: "介绍", link: "/Advanced/index.md" },
+            { text: "本文档", link: "/UpdateLog/mydocs.md" },
+            { text: "cesium官网", link: "/UpdateLog/cesiumlog.md" },
           ],
         },
       ],
