@@ -41,9 +41,7 @@ export default defineConfig({
         {
           text: "进阶",
           items: [
-            { text: "介绍2", link: "/Advanced/index.md" },
-            { text: "安装2", link: "/Advanced/Installation.md" },
-            { text: "快速开始2", link: "/Advanced/QuickStart.md" },
+            { text: "介绍", link: "/Advanced/index.md" },
           ],
         },
       ],
