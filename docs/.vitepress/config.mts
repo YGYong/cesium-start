@@ -15,7 +15,7 @@ export default defineConfig({
     // https://vitepress.dev/reference/default-theme-config
     nav: [
       { text: "基础", link: "/Basics/00_简介.md" },
-      { text: "进阶", link: "/Advanced/index.md" },
+      { text: "进阶", link: "/Advanced/00_时间.md" },
       { text: "实践", link: "/Practice/00_.md" },
       {
         text: "外部链接",
@@ -61,7 +61,15 @@ export default defineConfig({
       "/Advanced/": [
         {
           text: "进阶",
-          items: [{ text: "介绍", link: "/Advanced/index.md" }],
+          items: [
+            { text: "时间", link: "/Advanced/00_时间.md" },
+            { text: "Scene场景", link: "/Advanced/01_Scene场景.md" },
+            { text: "Primitive图元", link: "/Advanced/02_Primitive图元.md" },
+            { text: "Appearance外观", link: "/Advanced/03_Appearance外观.md" },
+            { text: "3DTiles", link: "/Advanced/04_3DTiles.md" },
+            { text: "自定义材质", link: "/Advanced/05_自定义材质.md" },
+            { text: "事件进阶", link: "/Advanced/06_事件进阶.md" },
+          ],
         },
       ],
       "/UpdateLog/": [
