@@ -158,16 +158,3 @@ viewer.camera.flyTo({
 | FrustumGeometry         | 视锥体     | 相机视野       |
 | GroundPolylineGeometry  | 地表折线   | 贴合地面的路径 |
 | CoplanarPolygonGeometry | 共面多边形 | 复杂平面图形   |
-
-## 添加 3d 实体
-
-```js
-try {
-  const tileset = await Cesium.createOsmBuildingsAsync();
-  viewer.scene.primitives.add(tileset);
-} catch (error) {
-  console.log(`Error creating tileset: ${error}`);
-}
-```
-
-![默认3D实体](../Aassets/Advanced/namol3D.png)

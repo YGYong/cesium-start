@@ -29,6 +29,14 @@ export default defineConfig({
             link: "https://cesium.com/learn/cesiumjs/ref-doc/",
           },
           {
+            text: "3D模型",
+            link: "https://sketchfab.com/feed",
+          },
+          {
+            text: "GeoJson数据",
+            link: "https://geojson.cn/data/atlas/china",
+          },
+          {
             text: "优秀开源博客(cesium.xin)",
             link: "http://cesium.xin/",
           },
@@ -63,12 +71,12 @@ export default defineConfig({
           text: "进阶",
           items: [
             { text: "时间", link: "/Advanced/00_时间.md" },
-            { text: "Scene场景", link: "/Advanced/01_Scene场景.md" },
+            // { text: "Scene场景", link: "/Advanced/01_Scene场景.md" },
             { text: "Primitive图元", link: "/Advanced/02_Primitive图元.md" },
             { text: "Appearance外观", link: "/Advanced/03_Appearance外观.md" },
             { text: "3DTiles", link: "/Advanced/04_3DTiles.md" },
             { text: "自定义材质", link: "/Advanced/05_自定义材质.md" },
-            { text: "事件进阶", link: "/Advanced/06_事件进阶.md" },
+            // { text: "事件进阶", link: "/Advanced/06_事件进阶.md" },
           ],
         },
       ],
