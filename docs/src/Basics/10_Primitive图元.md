@@ -4,7 +4,7 @@
 
 Primitive（图元） 是 Cesium 中用于直接渲染几何图形的底层构建块。它们提供了比 Entity API 更接近 WebGL 的抽象层，允许开发者进行更精细的控制和优化。
 
-![结构图](../Aassets/Advanced/primitiveGraph.png)
+![结构图](../Aassets/Basics/primitiveGraph.png)
 
 ### 与 Entity 的核心区别
 
@@ -125,7 +125,7 @@ viewer.camera.flyTo({
 });
 ```
 
-![矩形](../Aassets/Advanced/primitiveRec.png)
+![矩形](../Aassets/Basics/primitiveRec.png)
 
 ## Geometry 类型大全
 

@@ -1,6 +1,6 @@
 # Viewer：三维场景的“外壳”
 
-[Viewer](https://cesium.com/learn/cesiumjs/ref-doc/Viewer.html?classFilter=viewer) 是 Cesium 的核心容器，负责整合所有可视化组件（地图、控件、实体等），提供一个完整的 3D 地球视图框架。
+[Viewer](https://cesium.com/learn/cesiumjs/ref-doc/Viewer.html?classFilter=viewer) 是 Cesium 的核心容器，作为 Cesium 应用入口，封装场景渲染、相机控制、交互逻辑等核心功能
 ![viewer](../Aassets/Basics/viewer.png)
 
 ## 创建 Viewer 实例
@@ -29,6 +29,7 @@ const viewer = new Cesium.Viewer(container, options);
 | fullscreenButton | 全屏按钮 | boolean | true |
 | vrButton | VR 按钮 | boolean | false |
 | infoBox | 信息框 | boolean | true |
+| selectionIndicator | 选择指示器 | boolean | true |
 
 使用方式：
 
@@ -49,28 +50,41 @@ const viewer = new Cesium.Viewer(cesiumContainer.value, {
 
 Scene 是 Viewer 的内部对象，管理 WebGL 渲染、相机、光照和几何体绘制
 
-1. 设置背景颜色，cesium 默认是**_星系背景_**，可自定义更换：
+#### 隐藏地球
 
-方式一：`需将skybox属性设置为false，否则会覆盖背景颜色`
+```js
+scene.globe.show = false; // 隐藏地球
+```
+
+#### 场景模式切换
+
+```js
+// 切换到2D模式
+scene.morphTo2D(2); // 2秒过渡时间
+
+// 切换到3D模式
+scene.morphTo3D(2);
+
+// 切换到哥伦布视图（2.5D）
+scene.morphToColumbusView(2);
+```
+
+#### 天空盒
+
+设置背景颜色，cesium 默认是**_星系背景_**，可自定义更换，`需将skyBox属性设置为false，否则会覆盖背景颜色`
 
 ```js
 const viewer = new Cesium.Viewer(cesiumContainer.value, {
-  skyBox: false, // 关闭天空盒
+  skyBox: false, // 方式一：关闭天空盒
 });
+// viewer.scene.skyBox.show = false; // 方式二
 // 设置场景背景颜色为天空蓝
-viewer.scene.backgroundColor = Cesium.Color.SKYBLUE;
-```
-
-方式二：`需将skybox属性设置为false，否则会覆盖背景颜色`
-
-```js
-viewer.scene.skyBox.show = false;
 viewer.scene.backgroundColor = Cesium.Color.SKYBLUE;
 ```
 
 ![天空蓝背景](../Aassets/Basics/skyBlueBg.png)
 
-方式三：`自定义天空盒背景图，添加自定义图片`，[官网 API](https://cesium.com/learn/cesiumjs/ref-doc/SkyBox.html)
+`自定义天空盒背景图，添加自定义图片`，[官网 API](https://cesium.com/learn/cesiumjs/ref-doc/SkyBox.html)
 
 ```js
 // 引入图片资源
@@ -93,10 +107,9 @@ viewer.scene.skyBox = new Cesium.SkyBox({
 });
 ```
 
-**参数说明：**
 ![天空盒背景](../Aassets/Basics/skyBoxBg.png)
 
-2. 关闭大气层显示
+#### 关闭大气层显示
 
 ```js
 // 方式一
@@ -109,39 +122,65 @@ const viewer = new Cesium.Viewer(cesiumContainer.value, {
 
 ![大气层](../Aassets/Basics/skyAtmosphere.png)
 
-3. 显示帧率
+#### 显示帧率
 
 ```js
 viewer.scene.debugShowFramesPerSecond = true;
 ```
 
+<!-- #### 深度检测与地形遮挡
+
+```js
+// 开启深度检测（解决地形与模型穿插）
+scene.globe.depthTestAgainstTerrain = true;
+
+// 设置地形遮挡（裁剪平面）
+const clippingPlane = new Cesium.ClippingPlane({
+  normal: new Cesium.Cartesian3(0.0, 0.0, -1.0), // 法线方向
+  distance: -100.0, // 裁剪距离
+});
+
+scene.globe.clippingPlanes = new Cesium.ClippingPlaneCollection({
+  planes: [clippingPlane],
+  enabled: true,
+});
+``` -->
+
 ### 实体添加(entity)、GeoJson 数据添加
 
 #### 实体添加：
 
-案例请参考[实体添加](./08_实体.md)
-| 实体类型 | 描述 |
-| --- | --- |
-| 点（Point） | 要与此实体关联的点 |
-| 线（Polyline） | 要与此实体关联的多段线 |
-| 多边形（Polygon） | 要与此实体关联的多边形 |
-| 模型（Model） | 要与此实体关联的模型 |
-| 广告牌（Billboard） | 要与此实体关联的公告板 |
-| 箱（Box） | 要与此实体关联的框 |
-| 矩形（Rectangle） | 要与此实体关联的矩形 |
-| 椭圆（Ellipse） | 要与此实体关联的椭圆 |
-| 椭圆体（Ellipsoid） | 要与此实体关联的椭球体 |
-| 标签（Label） | 与此实体关联的标签 |
-| 路径（Path） | 要与此实体关联的路径 |
-| 平面（Plane） | 要与此实体关联的平面 |
-| 墙（Wall） | 要与此实体关联的墙 |
-| 走廊（Corridor） | 要与此实体关联的走廊 |
-| 圆柱体（Cylinder） | 要与此实体关联的圆柱体 |
-| 瓦片集（Tileset） | 要与此实体关联的 3D Tiles 图块集 |
+这里提供一个简单的实体，介绍一下配置项中的选择指示器`selectionIndicator`和信息框`infoBox`，详细实体介绍参考[实体类型](./08_实体.md)
+
+```js
+const rectangle = viewer.entities.add({
+  rectangle: {
+    coordinates: Cesium.Rectangle.fromDegrees(
+      116.3975,
+      39.9075,
+      116.4075,
+      39.9175
+    ),
+    material: Cesium.Color.RED.withAlpha(0.5),
+  },
+});
+viewer.zoomTo(rectangle);
+```
+
+![选择指示器](../Aassets/Basics/infoBoxClose.png)
+
+点击实体会出现标识控件和提示框，可通过设置为 false 来关闭。
+
+```js
+new Cesium.Viewer(cesiumContainer.value, {
+  selectionIndicator: false, // 关闭选择指示器
+  infoBox: false, // 关闭信息框
+});
+```
 
 #### GeoJson 数据添加：
 
-GeoJson 是一种用于描述地理空间数据的开放标准，支持点、线、面等几何对象。以下为一个简单的 GeoJson 示例，更多可参考[数据加载](../Advanced/07_数据加载.md)
+GeoJson 是一种用于描述地理空间数据的开放标准，支持点、线、面等几何对象。以下为一个简单的 GeoJson 示例，更多可参考[数据加载](./15_数据加载.md)
 
 ```js
 // 模拟一个GeoJson数据
@@ -170,7 +209,7 @@ viewer.flyTo(dataSource);
 
 Cesium 的地形系统允许在三维地球表面呈现真实高程数据（山脉、峡谷、河流等地貌），结合 地形瓦片 和 LOD（细节层次） 技术实现高效渲染。
 
-`默认地形加载：`地形加载有多种方式，这里介绍两种，一种是使用 Cesium 提供的默认地形，另一种是使用[自定义地形数据](../Advanced/08_自定义地形.md)。
+#### 默认地形
 
 ```js
 // 使用默认地形
@@ -183,6 +222,31 @@ const viewer = new Cesium.Viewer("cesiumContainer", {
 ```
 
 ![默认地形](../Aassets/Basics/defaultTerrain.png)
+
+#### 本地地形
+
+```js
+// 加载本地地形切片
+const localTerrain = new Cesium.CesiumTerrainProvider({
+  url: "./assets/terrain",
+  requestVertexNormals: true,
+  requestWaterMask: true,
+});
+viewer.terrainProvider = localTerrain;
+```
+
+#### 获取地形的高度
+
+使用`sampleTerrainMostDetailed`,可接受一个或多个位置，返回一个包含高度信息的数组。
+
+```js
+// 获取某一点的地形高度
+const position = Cesium.Cartographic.fromDegrees(longitude, latitude);
+const height = await Cesium.sampleTerrainMostDetailed(viewer.terrainProvider, [
+  position,
+]);
+console.log(height[0].height); // 该点的地形高度
+```
 
 ### Viewer 常用方法
 

@@ -4,10 +4,12 @@ import { defineConfig } from "vitepress";
 export default defineConfig({
   title: "Cesium学习之路",
   description: "Cesium docs",
+  head: [["link", { rel: "icon", href: "/favicon.ico" }]],
   srcDir: "src",
   lastUpdated: true,
   themeConfig: {
     // aside: false,
+    logo: "/favicon.ico",
     outline: {
       level: "deep",
       label: "目录",
@@ -15,7 +17,6 @@ export default defineConfig({
     // https://vitepress.dev/reference/default-theme-config
     nav: [
       { text: "基础", link: "/Basics/00_简介.md" },
-      { text: "进阶", link: "/Advanced/00_时间.md" },
       { text: "实践", link: "/Practice/00_.md" },
       {
         text: "外部链接",
@@ -44,7 +45,7 @@ export default defineConfig({
       },
       {
         text: "更新日志",
-        link: "/UpdateLog/mydocs.md",
+        link: "/UpdateLog/cesiumlog.md",
       },
     ],
 
@@ -63,30 +64,19 @@ export default defineConfig({
             { text: "事件", link: "/Basics/07_事件" },
             { text: "实体类型", link: "/Basics/08_实体" },
             { text: "材质", link: "/Basics/09_材质" },
-          ],
-        },
-      ],
-      "/Advanced/": [
-        {
-          text: "进阶",
-          items: [
-            { text: "时间", link: "/Advanced/00_时间.md" },
-            // { text: "Scene场景", link: "/Advanced/01_Scene场景.md" },
-            { text: "Primitive图元", link: "/Advanced/02_Primitive图元.md" },
-            { text: "Appearance外观", link: "/Advanced/03_Appearance外观.md" },
-            { text: "3DTiles", link: "/Advanced/04_3DTiles.md" },
-            { text: "自定义材质", link: "/Advanced/05_自定义材质.md" },
-            // { text: "事件进阶", link: "/Advanced/06_事件进阶.md" },
+            { text: "Primitive图元", link: "/Basics/10_Primitive图元" },
+            { text: "Appearance外观", link: "/Basics/11_Appearance外观" },
+            { text: "自定义材质", link: "/Basics/12_自定义材质" },
+            { text: "日期", link: "/Basics/13_时间" },
+            { text: "3D_Tiles", link: "/Basics/14_3DTiles" },
+            { text: "数据加载", link: "/Basics/15_数据加载" },
           ],
         },
       ],
       "/UpdateLog/": [
         {
           text: "更新日志",
-          items: [
-            { text: "本文档", link: "/UpdateLog/mydocs.md" },
-            { text: "cesium官网", link: "/UpdateLog/cesiumlog.md" },
-          ],
+          items: [{ text: "cesium官网", link: "/UpdateLog/cesiumlog.md" }],
         },
       ],
     },

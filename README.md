@@ -9,15 +9,13 @@
 
 ## 开启您的三维地理可视化之旅！
 
-- 项目地址：xxx(服务器待购买)
-- GitHub 内快速预览:[https://github.com/YGYong/cesium-start/blob/master/docs/src/Basics/00\_%E7%AE%80%E4%BB%8B.md](https://github.com/YGYong/cesium-start/blob/master/docs/src/Basics/00_%E7%AE%80%E4%BB%8B.md)
+- 项目地址：xxx(服务器已买，这两天基础更新完会部署一版)
 
 ## 🚀 项目亮点
 
 - **前沿技术栈**：Vue3 + Vite + Cesium 组合，享受极速开发体验
-- **渐进式学习路径**：基础 → 进阶 → 实践，系统化掌握三维 GIS 开发
-- **现代工程实践**：Vite 极速热更新 + Cesium 按需加载 + Vue 组件化
-- **完整示例库**：包含 20+个精心设计的 Cesium 应用场景
+- **渐进式学习路径**：基础 → 实践，系统化掌握三维 GIS 开发
+- **完整示例库**：每个API教程都提供了可直接使用的源码及效果图
 - **响应式设计**：适配桌面与移动设备，随时随地学习
 
 ## 📚 学习路线
@@ -28,24 +26,11 @@
 - 实体(Entity)与图元(Primitive)的创建与管理
 - 地形与影像图层加载
 - 基础几何体绘制（点、线、面）
-- 简单粒子系统与动画效果
+- 3D_Tiles及数据加载
 
-### 2. 进阶篇
+### 2. 实践项目
 
-- 3D Tiles 高性能模型加载
-- 自定义着色器(Shader)效果
-- 时间动态数据可视化
-- 高级相机路径动画
-- 地理围栏与空间分析
-- 与 Mapbox/OpenLayers 集成
-
-### 3. 实践项目
-
-- **智慧城市可视化**：建筑 LOD 加载与热力图展示
-- **无人机航线规划**：实时路径模拟与地形分析
-- **气象数据可视化**：动态风场与温度分布
-- **历史地理变迁**：时间轴驱动的历史地图对比
-- **AR 地理定位**：结合设备传感器的混合现实体验
+- 待更新......
 
 ## ⚡ 快速开始
 
@@ -73,33 +58,6 @@ npm run dev
 ```bash
 npm run docs:build
 ```
-
-# 🌐 项目结构
-
-cesium-learning/
-├── public/ # 静态资源
-├── src/
-│ ├── assets/ # 公共资源
-│ ├── components/ # 全局组件
-│ │ ├── cesium/ # Cesium 封装组件
-│ │ │ ├── CesiumViewer.vue
-│ │ │ ├── CesiumEntity.vue
-│ │ │ └── ...
-│ ├── layouts/ # 页面布局
-│ ├── pages/ # 学习模块
-│ │ ├── basics/ # 基础篇
-│ │ ├── advanced/ # 进阶篇
-│ │ └── projects/ # 实践项目
-│ ├── stores/ # Pinia 状态管理
-│ ├── styles/ # 全局样式
-│ ├── utils/ # 工具函数
-│ │ └── cesiumHelpers.js # Cesium 工具类
-│ ├── router.js # 路由配置
-│ └── main.js # 应用入口
-├── .vitepress/ # Vitepress 配置
-├── docs/ # 文档目录
-├── vite.config.js # Vite 配置
-└── package.json
 
 # 🤝 联系方式，欢迎探讨
 
