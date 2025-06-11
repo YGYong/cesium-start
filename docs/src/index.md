@@ -3,14 +3,14 @@
 layout: home
 
 hero:
-  name: "Cesium学习"
-  text: "Vue3 & Cesium实践"
+  name: "Cesium中文学习"
+  text: "Vue3 & Cesium"
   # tagline: Vue中使用Cesium
   actions:
     - theme: brand
       text: 快速进入
       link: /Basics/00_简介
-   # - theme: alt
+    # - theme: alt
     #  text: API Examples
     #  link: /Basics/index
 
@@ -22,4 +22,3 @@ features:
   - title: 持续学习
     details: 不断学习和探索，不断提升自己的技术水平。
 ---
-

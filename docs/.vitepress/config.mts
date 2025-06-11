@@ -2,7 +2,7 @@ import { defineConfig } from "vitepress";
 
 // https://vitepress.dev/reference/site-config
 export default defineConfig({
-  title: "Cesium学习之路",
+  title: "Cesium快速入门",
   description: "Cesium docs",
   head: [["link", { rel: "icon", href: "/favicon.ico" }]],
   srcDir: "src",
