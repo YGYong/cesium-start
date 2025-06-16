@@ -20,7 +20,7 @@ Entity 是基于 Primitive 的封装, 提供了更高级的 API, 更易用, 但�
 
 ## 核心配置项
 
-1. geometryInstances - 几何实例
+1. geometryInstances - 几何实例 [官网](https://cesium.com/learn/cesiumjs/ref-doc/GeometryInstance.html?classFilter=GeometryInstance)
 
    - 单个实例：直接传递一个 GeometryInstance 对象
 
@@ -34,10 +34,10 @@ Entity 是基于 Primitive 的封装, 提供了更高级的 API, 更易用, 但�
 ```js
 const primitive = new Cesium.Primitive({
   // 必需：几何实例（单个或多个）
-  geometryInstances: geometryInstance,
+  geometryInstances: [geometryInstance1, geometryInstance2],
 
   // 必需：外观定义
-  appearance: appearance,
+  appearance: new Cesium.PerInstanceColorAppearance(),
 
   // 可选：是否异步创建（默认true）
   asynchronous: true,
@@ -108,7 +108,7 @@ const appearance = new Cesium.EllipsoidSurfaceAppearance({
 
 ```js
 const primitive = new Cesium.Primitive({
-  geometryInstances: instance,
+  geometryInstances: [instance],
   appearance: appearance,
   releaseGeometryInstances: false,
   compressVertices: true, // 顶点压缩优化
@@ -126,6 +126,64 @@ viewer.camera.flyTo({
 ```
 
 ![矩形](../Aassets/Basics/primitiveRec.png)
+
+## GeometryInstance 详解
+
+### 创建 GeometryInstance
+
+```js
+const geometryInstance = new Cesium.GeometryInstance({
+  geometry: new Cesium.RectangleGeometry({
+    // 几何体定义
+    rectangle: Cesium.Rectangle.fromDegrees(-110.0, 20.0, -100.0, 30.0),
+    vertexFormat: Cesium.PerInstanceColorAppearance.VERTEX_FORMAT,
+  }),
+  attributes: {
+    // 实例属性
+    color: new Cesium.ColorGeometryInstanceAttribute(1.0, 0.0, 0.0, 0.5),
+  },
+  modelMatrix: Cesium.Matrix4.IDENTITY.clone(), // 模型矩阵
+  id: "rectangle-instance", // 唯一标识符
+});
+```
+
+### 几何体属性 (Attributes)
+
+```js
+attributes: {
+  // 颜色属性 (RGBA)
+  color: new Cesium.ColorGeometryInstanceAttribute(
+    red, green, blue, alpha
+  ),
+
+  // 是否显示
+  show: new Cesium.ShowGeometryInstanceAttribute(
+    true
+  ),
+
+  // 距离显示属性
+  distanceDisplayCondition: new Cesium.DistanceDisplayConditionGeometryInstanceAttribute(
+    nearDistance, farDistance
+  )
+}
+```
+
+### 模型变换 (ModelMatrix)
+
+```js
+// 创建平移矩阵
+const translation = new Cesium.Cartesian3(10000, 0, 0);
+const modelMatrix = Cesium.Transforms.eastNorthUpToFixedFrame(
+  Cesium.Cartesian3.fromDegrees(-105.0, 40.0, 1000),
+  Cesium.Ellipsoid.WGS84,
+  new Cesium.Matrix4()
+);
+Cesium.Matrix4.multiplyByTranslation(modelMatrix, translation, modelMatrix);
+
+// 创建旋转矩阵
+const rotation = Cesium.Matrix3.fromRotationX(Cesium.Math.toRadians(45));
+Cesium.Matrix4.multiplyByMatrix3(modelMatrix, rotation, modelMatrix);
+```
 
 ## Geometry 类型大全
 
@@ -158,3 +216,62 @@ viewer.camera.flyTo({
 | FrustumGeometry         | 视锥体     | 相机视野       |
 | GroundPolylineGeometry  | 地表折线   | 贴合地面的路径 |
 | CoplanarPolygonGeometry | 共面多边形 | 复杂平面图形   |
+
+### 创建 BoxGeometry
+
+```js
+// 1. 定义盒子中心位置（WGS84坐标）
+const center = Cesium.Cartesian3.fromDegrees(116.39, 39.9, 1000);
+
+// 2. 定义盒子尺寸（单位：米）
+const boxSize = new Cesium.Cartesian3(500.0, 800.0, 300.0); // 长(x)、宽(y)、高(z)
+
+// 3. 计算最小和最大点（以中心为原点）
+const halfSize = Cesium.Cartesian3.multiplyByScalar(
+  boxSize,
+  0.5,
+  new Cesium.Cartesian3()
+);
+const minimum = Cesium.Cartesian3.negate(halfSize, new Cesium.Cartesian3());
+const maximum = halfSize;
+
+// 4. 创建盒子几何体（使用正确的参数）
+const boxGeometry = new Cesium.BoxGeometry({
+  vertexFormat: Cesium.VertexFormat.POSITION_AND_NORMAL, // 包含法线信息（用于光照）
+  minimum: minimum,
+  maximum: maximum,
+});
+
+// 5. 创建模型矩阵（包含位置和方向）
+const modelMatrix = Cesium.Transforms.eastNorthUpToFixedFrame(center);
+
+// 6. 创建几何实例
+const instance = new Cesium.GeometryInstance({
+  geometry: boxGeometry,
+  modelMatrix: modelMatrix,
+  id: "custom-box", // 可选ID，用于拾取识别
+  attributes: {
+    color: Cesium.ColorGeometryInstanceAttribute.fromColor(
+      Cesium.Color.RED.withAlpha(0.7)
+    ), // 带透明度
+  },
+});
+
+// 7. 创建Primitive并添加到场景
+const boxPrimitive = new Cesium.Primitive({
+  geometryInstances: instance,
+  appearance: new Cesium.PerInstanceColorAppearance({
+    closed: true, // 封闭几何体（盒子必须封闭）
+    translucent: true, // 启用透明度
+  }),
+  asynchronous: false, // 同步加载（小几何体适用）
+});
+
+viewer.scene.primitives.add(boxPrimitive);
+
+// 8. 视角定位
+viewer.camera.flyTo({
+  destination: center,
+  offset: new Cesium.HeadingPitchRange(0, Cesium.Math.toRadians(-45), 2000),
+});
+```
