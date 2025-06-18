@@ -42,7 +42,7 @@ const appearance = new Cesium.MaterialAppearance({
 
 ### 创建内置材质
 
-使用`Cesium.Material.fromType`创建材质,材质配置项可参考[基础材质](./Basics/09_材质.md),
+使用`Cesium.Material.fromType`创建材质,材质配置项可参考[基础材质](./09_材质.md),
 更多内置材质可参考[内置材质](https://cesium.com/learn/cesiumjs/ref-doc/Material.html)
 
 ```js
