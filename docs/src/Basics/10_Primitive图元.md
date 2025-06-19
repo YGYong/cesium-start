@@ -90,7 +90,7 @@ const instance = new Cesium.GeometryInstance({
 });
 ```
 
-3. 定义外观
+3. 定义外观,这里的`material`可以选择[材质类型](https://cesium.com/learn/cesiumjs/ref-doc/Material.html?classFilter=Material)
 
 ```js
 const appearance = new Cesium.EllipsoidSurfaceAppearance({
@@ -274,4 +274,22 @@ viewer.camera.flyTo({
   destination: center,
   offset: new Cesium.HeadingPitchRange(0, Cesium.Math.toRadians(-45), 2000),
 });
+```
+
+### 销毁流程
+
+1. `remove(boxPrimitive)`从场景中移除
+
+```js
+// 从场景中移除
+viewer.scene.primitives.remove(boxPrimitive);
+// 检查是否销毁
+console.log(boxPrimitive.isDestroyed()); // true
+```
+
+2. `destroy()`显式销毁,一旦对象被销毁，就不应该使用它;调用 isDestroyed 将导致 DeveloperError 异常,`DeveloperError : This object was destroyed, i.e., destroy() was called.`
+
+```js
+// 显式销毁
+boxPrimitive = boxPrimitive && boxPrimitive.destroy();
 ```
