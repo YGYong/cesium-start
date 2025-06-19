@@ -10,4 +10,4 @@ try {
 }
 ```
 
-![默认3D实体](../Aassets/Advanced/namol3D.png)
+![默认3D实体](../Aassets/Basics/namol3D.png)
