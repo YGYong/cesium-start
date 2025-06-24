@@ -88,7 +88,7 @@ export default defineConfig({
       prev: "上一页",
       next: "下一页",
     },
-    lastUpdatedText: "最后更新时间",
+    // lastUpdatedText: "最后更新时间",
     search: {
       provider: "local",
     },
