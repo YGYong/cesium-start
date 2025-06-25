@@ -17,7 +17,7 @@ export default defineConfig({
     // https://vitepress.dev/reference/default-theme-config
     nav: [
       { text: "基础", link: "/Basics/00_简介.md" },
-      { text: "实践", link: "/Practice/00_.md" },
+      { text: "实践", link: "/Practice/基础/00_公共函数.md" },
       {
         text: "外部链接",
         items: [
@@ -38,7 +38,11 @@ export default defineConfig({
             link: "https://geojson.cn/data/atlas/china",
           },
           {
-            text: "优秀开源博客(cesium.xin)",
+            text: "Cesium-Examples",
+            link: "https://jiawanlong.github.io/Cesium-Examples/examples/",
+          },
+          {
+            text: "cesium.xin",
             link: "http://cesium.xin/",
           },
         ],
@@ -73,10 +77,30 @@ export default defineConfig({
           ],
         },
       ],
+      "/Practice/": [
+        {
+          text: "实践",
+          items: [
+            { text: "公共函数", link: "/Practice/基础/00_公共函数.md" },
+            {
+              text: "基础案例",
+              items: [
+                { text: "网格", link: "/Practice/基础/01_网格.md" },
+                // { text: "添加GeoJson数据", link: "/Practice/基础/02_添加GeoJson数据.md" },
+              ],
+            },
+
+            // { text: "实践2", link: "/Practice/01_.md" },
+            // { text: "实践3", link: "/Practice/02_.md" },
+            // { text: "实践4", link: "/Practice/03_.md" },
+            // { text: "实践5", link: "/Practice/04_.md" },
+          ],
+        },
+      ],
       "/UpdateLog/": [
         {
           text: "更新日志",
-          items: [{ text: "cesium官网", link: "/UpdateLog/cesiumlog.md" }],
+          items: [{ text: "更新日志", link: "/UpdateLog/cesiumlog.md" }],
         },
       ],
     },
