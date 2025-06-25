@@ -6,7 +6,7 @@ export default defineConfig({
   description: "Cesium docs",
   head: [["link", { rel: "icon", href: "/favicon.ico" }]],
   srcDir: "src",
-  lastUpdated: true,
+  // lastUpdated: true,
   themeConfig: {
     // aside: false,
     logo: "/favicon.ico",
