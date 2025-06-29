@@ -72,11 +72,13 @@ const gridMaterial = Cesium.Material.fromType("Grid", {
 
 ### PerInstanceColorAppearance 实例颜色外观
 
+使用 instance 颜色外观,为每个几何体实例设置不同的颜色，适合批量渲染不同颜色的图元。
+
 ```js
 const appearance = new Cesium.PerInstanceColorAppearance({
   translucent: true, // 是否半透明
   closed: false, // 是否封闭几何体
-  flat: false, // 是否使用平面着色
+  flat: false, // 是否使用平面着色,不考虑光照
   renderState: {
     // 自定义渲染状态
     depthTest: {
@@ -109,60 +111,89 @@ const anotherInstance = new Cesium.GeometryInstance({
 
 const rectanglePrimitive = new Cesium.Primitive({
   geometryInstances: [instance, anotherInstance],
-  appearance: new Cesium.PerInstanceColorAppearance(),
+  appearance: new Cesium.PerInstanceColorAppearance({
+    flat: true, // 不考虑光照
+    translucent: true, // 启用透明度
+  }),
 });
 ```
 
-## 以下完全为 ai 总结
-
 ### EllipsoidSurfaceAppearance
 
-特点：
-
-- 专为地球表面几何体优化
-
-- 自动处理地表曲率
-
-- 支持材质和纹理坐标
+椭球表面外观，专门用于渲染贴合地球表面的图元，支持多种材质。
 
 ```js
-const appearance = new Cesium.EllipsoidSurfaceAppearance({
-  aboveGround: true, // 是否在地面上方
-  vertexFormat: Cesium.VertexFormat.POSITION_AND_ST,
-  material: new Cesium.Material({
-    fabric: {
-      type: "Checkerboard",
-      uniforms: {
-        lightColor: new Cesium.Color(1.0, 1.0, 0.0, 1.0),
-        darkColor: new Cesium.Color(0.0, 0.0, 1.0, 1.0),
-        repeat: new Cesium.Cartesian2(10.0, 10.0),
-      },
-    },
-  }),
+// 1. 定义椭球体几何体
+const geometry = new Cesium.PolygonGeometry({
+  polygonHierarchy: new Cesium.PolygonHierarchy(
+    Cesium.Cartesian3.fromDegreesArray([
+      116.39,
+      39.9, // 第一个点
+      116.4,
+      39.9, // 第二个点
+      116.4,
+      39.91, // 第三个点
+      116.39,
+      39.91, // 第四个点
+    ])
+  ),
+  height: 0, // 高度为0，表示在地面上
+  vertexFormat: Cesium.EllipsoidSurfaceAppearance.VERTEX_FORMAT, // 包含位置和法线信息
 });
+// 2. 创建几何实例
+const geometryInstance = new Cesium.GeometryInstance({
+  geometry,
+});
+// 3. 创建外观
+const appearance = new Cesium.EllipsoidSurfaceAppearance({
+  material: Cesium.Material.fromType("Stripe"),
+});
+
+// 4. 创建 Primitive
+const primitive = new Cesium.Primitive({
+  geometryInstances: [geometryInstance],
+  appearance,
+});
+
+viewer.scene.primitives.add(primitive);
 ```
 
 ### PolylineMaterialAppearance
 
-特点：
-
-- 专为折线优化
-
-- 支持各种折线材质
-
-- 提供抗锯齿效果
+折线材质外观，支持多种材质类型，适合渲染带有特殊效果的折线。
 
 ```js
-const appearance = new Cesium.PolylineMaterialAppearance({
-  material: Cesium.Material.fromType("PolylineGlow", {
-    color: new Cesium.Color(0.0, 1.0, 1.0, 1.0),
-    glowPower: 0.2,
+// 1. 定义线段几何体
+const geometryInstance = new Cesium.GeometryInstance({
+  geometry: new Cesium.PolylineGeometry({
+    positions: Cesium.Cartesian3.fromDegreesArray([
+      116.39,
+      39.9, // 第一个点
+      116.4,
+      39.9, // 第二个点
+      116.4,
+      39.91, // 第三个点
+      116.39,
+      39.91, // 第四个点
+    ]),
+    width: 10.0,
+    vertexFormat: Cesium.PolylineMaterialAppearance.VERTEX_FORMAT,
   }),
-  width: 10.0, // 线宽（像素）
+});
+
+// 2. 创建外观
+const appearance = new Cesium.PolylineMaterialAppearance({
+  material: Cesium.Material.fromType("Color"),
+});
+
+// 3. 创建几何体实例
+const primitive = new Cesium.Primitive({
+  geometryInstances: [geometryInstance],
+  appearance,
 });
 ```
 
-### Appearance 核心配置
+<!-- ### Appearance 核心配置
 
 #### 渲染状态 (RenderState)
 
@@ -264,4 +295,4 @@ const appearance = new Cesium.MaterialAppearance({
     }
   `,
 });
-```
+``` -->

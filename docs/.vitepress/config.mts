@@ -30,6 +30,10 @@ export default defineConfig({
             link: "https://cesium.com/learn/cesiumjs/ref-doc/",
           },
           {
+            text: "Cesium Demo",
+            link: "https://sandcastle.cesium.com/index.html?src=3D%20Models.html&label=All",
+          },
+          {
             text: "3D模型",
             link: "https://sketchfab.com/feed",
           },
@@ -86,7 +90,9 @@ export default defineConfig({
               text: "基础案例",
               items: [
                 { text: "网格", link: "/Practice/基础/01_网格.md" },
-                // { text: "添加GeoJson数据", link: "/Practice/基础/02_添加GeoJson数据.md" },
+                { text: "飞机飞行", link: "/Practice/基础/02_飞机飞行.md" },
+                { text: "加载控件", link: "/Practice/基础/03_加载控件.md" },
+                // { text: "遮罩", link: "/Practice/基础/04_遮罩.md" },
               ],
             },
 

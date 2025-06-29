@@ -128,6 +128,47 @@ const viewer = new Cesium.Viewer(cesiumContainer.value, {
 viewer.scene.debugShowFramesPerSecond = true;
 ```
 
+#### 添加气泡窗口
+
+![气泡窗口](../Aassets/Basics/popup.png)
+
+自定义 html 内容，添加到场景中。可以通过`scene.cartesianToCanvasCoordinates`来实现
+
+```html
+<!-- 添加气泡窗口 -->
+<div
+  ref="popup"
+  style="
+      position: absolute;
+      padding: 10px;
+      border: 1px solid aqua;
+      border-radius: 5px;
+    "
+>
+  气泡窗口
+</div>
+```
+
+```js
+viewer.camera.setView({
+  destination: Cesium.Cartesian3.fromDegrees(121.4737, 31.2304, 5000),
+  orientation: {
+    heading: Cesium.Math.toRadians(0),
+    pitch: Cesium.Math.toRadians(-90),
+    roll: 0,
+  },
+});
+// 添加preRender事件，使窗口位置保持不变
+viewer.scene.preRender.addEventListener(function () {
+  const htmlPop = viewer.scene.cartesianToCanvasCoordinates(
+    Cesium.Cartesian3.fromDegrees(121.4737, 31.2304, 0),
+    new Cesium.Cartesian2()
+  );
+  popup.value.style.left = htmlPop.x + "px";
+  popup.value.style.top = htmlPop.y + "px";
+});
+```
+
 <!-- #### 深度检测与地形遮挡
 
 ```js
@@ -237,7 +278,7 @@ viewer.terrainProvider = localTerrain;
 
 #### 获取地形的高度
 
-使用`sampleTerrainMostDetailed`,可接受一个或多个位置，返回一个包含高度信息的数组。
+使用`sampleTerrainMostDetailed`,可接受一个或多个位置，返回一个包含高度信息的数组。它是一个异步方法，返回一个 Promise。
 
 ```js
 // 获取某一点的地形高度
