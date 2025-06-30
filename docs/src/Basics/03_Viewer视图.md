@@ -5,12 +5,12 @@
 
 ## 创建 Viewer 实例
 
-- container：指定容器元素，通常是一个 HTML 元素。
-- options：可选配置项，包括控件设置、实体类型设置等。
-
 ```js
 const viewer = new Cesium.Viewer(container, options);
 ```
+
+- container：指定容器元素，通常是一个 HTML 元素。
+- options：可选配置项，包括控件设置、实体类型设置等。
 
 ## 核心特性
 
@@ -77,7 +77,8 @@ scene.morphToColumbusView(2);
 const viewer = new Cesium.Viewer(cesiumContainer.value, {
   skyBox: false, // 方式一：关闭天空盒
 });
-// viewer.scene.skyBox.show = false; // 方式二
+// viewer.scene.skyBox.show = false; // 方式二：关闭天空盒
+
 // 设置场景背景颜色为天空蓝
 viewer.scene.backgroundColor = Cesium.Color.SKYBLUE;
 ```
