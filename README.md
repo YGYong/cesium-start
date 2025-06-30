@@ -55,4 +55,4 @@ npm run docs:build
 
 # 🤝 联系方式，欢迎探讨
 
-- 微信：![微信](./docs/src/Aassets/card.jpg){width=200px}
+![微信](./docs/src/Aassets/card.jpg){width=200px}
