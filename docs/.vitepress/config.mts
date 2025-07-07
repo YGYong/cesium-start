@@ -43,7 +43,7 @@ export default defineConfig({
           },
           {
             text: "Cesium-Examples",
-            link: "https://jiawanlong.github.io/Cesium-Examples/examples/",
+            link: "https://github.com/jiawanlong/Cesium-Examples",
           },
           {
             text: "cesium.xin",
@@ -93,7 +93,9 @@ export default defineConfig({
                 { text: "网格", link: "/Practice/基础/01_网格.md" },
                 { text: "飞机飞行", link: "/Practice/基础/02_飞机飞行.md" },
                 { text: "加载控件", link: "/Practice/基础/03_加载控件.md" },
-                // { text: "遮罩", link: "/Practice/基础/04_遮罩.md" },
+                { text: "GUI调试", link: "/Practice/基础/04_GUI调试.md" },
+                { text: "动态时序图", link: "/Practice/基础/05_动态时序图.md" },
+                { text: "沿线标注", link: "/Practice/基础/06_沿线标注.md" },
               ],
             },
 

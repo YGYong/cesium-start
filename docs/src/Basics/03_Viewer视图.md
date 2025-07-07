@@ -290,9 +290,31 @@ const height = await Cesium.sampleTerrainMostDetailed(viewer.terrainProvider, [
 console.log(height[0].height); // 该点的地形高度
 ```
 
+#### 地形夸张
+
+`scene.verticalExaggeration` 用于设置地形的垂直夸张比例，默认值为 1.0。可以通过调整该值来增强地形的视觉效果,强调微地形时有用
+
+```js
+// 定位到珠穆朗玛峰
+viewer.camera.setView({
+  destination: Cesium.Cartesian3.fromDegrees(86.925, 27.9881, 15000), // 经度、纬度、高度
+  orientation: {
+    heading: Cesium.Math.toRadians(0), // 方位角
+    pitch: Cesium.Math.toRadians(-90), // 俯仰角
+    roll: Cesium.Math.toRadians(0), // 翻滚角
+  },
+});
+
+// 地形夸张
+viewer.scene.verticalExaggeration = 4;
+```
+
+![地形夸张](../Aassets/Basics/verticalExaggeration.png)
+
 ### Viewer 常用方法
 
 - `zoomTo(target,offset)`：相机自动调整到指定实体的视野。(实体)
+  - `viewer.zoomTo(viewer.entities)`：缩放到所有实体
 - `flyTo(target, options)`：相机平滑过渡到指定实体的位置。(实体)
 - `camera.setView(options)`：立即设置相机位置。
 - `camera.flyTo(options)`：相机平滑过渡到指定位置。(注意与 flyTo 的区别)

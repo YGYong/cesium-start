@@ -293,3 +293,89 @@ console.log(boxPrimitive.isDestroyed()); // true
 // 显式销毁
 boxPrimitive = boxPrimitive && boxPrimitive.destroy();
 ```
+
+### 海量数据渲染
+
+例举集中大量数据渲染集合，更多信息可参考[PrimitiveCollection](https://cesium.com/learn/cesiumjs/ref-doc/PrimitiveCollection.html)
+
+| 数据类型                 | 典型应用                | 性能关键点     | 推荐结构          |
+| ------------------------ | ----------------------- | -------------- | ----------------- |
+| BillboardCollection      | POI 点、图标 纹理合并、 | 批次渲染       | 单集合 10 万+图标 |
+| PointPrimitiveCollection | 纯色点（无纹理）        | 顶点着色器渲染 | 单集合 100 万+点  |
+| PolylineCollection       | 路径、轨迹              | 批次渲染       | 单集合 10 万+路径 |
+| LabelCollection          | 文本标签、标注          | 字体纹理合并   | 单集合 10 万+标签 |
+
+```js
+// 添加大量广告牌集合
+const billboardCollection = viewer.scene.primitives.add(
+  new Cesium.BillboardCollection()
+);
+for (let i = 0; i < 10000; i++) {
+  billboardCollection.add({
+    position: Cesium.Cartesian3.fromDegrees(
+      Math.random() * 360 - 180, // 经度
+      Math.random() * 180 - 90, // 纬度
+      50
+    ),
+    image: "/src/assets/vue.svg", // 替换为实际图片路径
+    width: 32,
+    height: 32,
+    // scaleByDistance: new Cesium.NearFarScalar(10000, 1.0, 100000, 0.1), // 按距离缩放：避免远处图标浪费像素
+  });
+}
+```
+
+![广告牌集合](../Aassets/Basics/billboardCollection.png)
+
+### 加载模型
+
+```js
+const position = Cesium.Cartesian3.fromDegrees(116.3975, 39.9075, 500);
+const headingPositionRoll = new Cesium.HeadingPitchRoll();
+const fixedFrameTransform = Cesium.Transforms.localFrameToFixedFrameGenerator(
+  "north",
+  "west"
+);
+try {
+  let animations;
+  const model = await Cesium.Model.fromGltfAsync({
+    url: new URL("./models/Cesium_Air.glb", import.meta.url).href,
+    modelMatrix: Cesium.Transforms.headingPitchRollToFixedFrame(
+      position,
+      headingPositionRoll,
+      Cesium.Ellipsoid.WGS84,
+      fixedFrameTransform
+    ),
+    gltfCallback: (gltf) => {
+      animations = gltf.animations;
+    },
+    minimumPixelSize: 128, // 最小像素大小
+    scale: 2.0, // 模型缩放比例
+  });
+  viewer.scene.primitives.add(model);
+  viewer.camera.setView({
+    destination: Cesium.Cartesian3.fromDegrees(116.3975, 39.9075, 550),
+    orientation: {
+      heading: Cesium.Math.toRadians(180),
+      pitch: Cesium.Math.toRadians(-80),
+      roll: 0,
+    },
+  });
+  viewer.clock.shouldAnimate = true;
+  // 播放模型的动画
+  model.readyEvent.addEventListener(() => {
+    model.activeAnimations.add({
+      index: animations.length - 1,
+      loop: Cesium.ModelAnimationLoop.REPEAT,
+      multiplier: 0.5,
+    });
+  });
+} catch (error) {
+  console.log(`Failed to load model. ${error}`);
+}
+```
+
+<video controls width="600">
+  <source src="../Aassets/Basics/模型动画.mp4" type="video/mp4" />
+  您的浏览器不支持HTML5视频标签。
+</video>
