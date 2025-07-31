@@ -17,7 +17,7 @@ export default defineConfig({
     // https://vitepress.dev/reference/default-theme-config
     nav: [
       { text: "基础", link: "/Basics/00_简介.md" },
-      { text: "实践", link: "/Practice/基础/00_公共函数.md" },
+      { text: "实践", link: "/Practice/基础/1000_声明.md" },
       {
         text: "外部链接",
         items: [
@@ -64,12 +64,10 @@ export default defineConfig({
           items: [
             { text: "介绍", link: "/Basics/00_简介.md" },
             { text: "快速开始", link: "/Basics/01_快速开始" },
-            { text: "页面控件及logo隐藏", link: "/Basics/02_页面控件" },
-            { text: "Viewer视图", link: "/Basics/03_Viewer视图" },
             { text: "添加底图", link: "/Basics/04_添加底图" },
+            { text: "Viewer视图", link: "/Basics/03_Viewer视图" },
             { text: "相机", link: "/Basics/05_相机" },
             { text: "坐标系", link: "/Basics/06_坐标系" },
-            { text: "事件", link: "/Basics/07_事件" },
             { text: "实体类型", link: "/Basics/08_实体" },
             { text: "材质", link: "/Basics/09_材质" },
             { text: "Primitive图元", link: "/Basics/10_Primitive图元" },
@@ -78,6 +76,7 @@ export default defineConfig({
             { text: "日期与时钟", link: "/Basics/13_日期与时钟" },
             { text: "3D_Tiles", link: "/Basics/14_3DTiles" },
             { text: "数据加载", link: "/Basics/15_数据加载" },
+            { text: "事件系统", link: "/Basics/07_事件" },
             { text: "常用实例", link: "/Basics/17_常用实例.md" },
           ],
         },
@@ -86,6 +85,7 @@ export default defineConfig({
         {
           text: "实践",
           items: [
+            { text: "声明", link: "/Practice/基础/1000_声明.md" },
             { text: "公共函数", link: "/Practice/基础/00_公共函数.md" },
             {
               text: "基础案例",

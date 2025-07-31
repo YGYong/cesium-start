@@ -1,22 +1,164 @@
 # Cesium Primitive（图元）系统深度解析
 
-## 什么是 Primitive？
+## Primitive 核心概念
 
-Primitive（图元） 是 Cesium 中用于直接渲染几何图形的底层构建块。它们提供了比 Entity API 更接近 WebGL 的抽象层，允许开发者进行更精细的控制和优化。
+Primitive（图元）是 Cesium 中直接与 WebGL 交互的底层渲染单元，提供了对渲染管线的精细控制。与高层封装的 Entity API 不同，Primitive 允许开发者直接操作几何数据、着色器和渲染状态，是实现高性能复杂场景的关键技术。
+
+### Primitive 渲染流水线
+
+Primitive 的渲染流程涉及以下关键步骤：
+
+1. **几何定义**：创建 Geometry 描述顶点数据
+2. **实例化**：通过 GeometryInstance 创建可渲染实例（支持属性差异化）
+3. **外观定义**：通过 Appearance 指定渲染样式和着色器
+4. **批处理**：合并相同外观的实例以减少绘制调用
+5. **渲染状态**：配置 WebGL 渲染状态（深度测试、混合模式等）
+6. **绘制**：提交 GPU 渲染指令
 
 ![结构图](../Aassets/Basics/primitiveGraph.png)
+
+:::details 展开代码
+
+```vue
+<template>
+  <div ref="cesiumContainer" class="container"></div>
+</template>
+
+<script setup>
+import { ref, onMounted } from "vue";
+import * as Cesium from "cesium";
+const cesiumContainer = ref(null);
+let viewer = null;
+
+// 天地图TOKEN
+const token = "05be06461004055923091de7f3e51aa6";
+
+onMounted(() => {
+  // 初始化Viewer
+  viewer = new Cesium.Viewer(cesiumContainer.value, {
+    geocoder: false, // 关闭地理编码搜索
+    homeButton: false, // 关闭主页按钮
+    sceneModePicker: false, // 关闭场景模式选择器
+    baseLayerPicker: false, // 关闭底图选择器
+    navigationHelpButton: false, // 关闭导航帮助
+    animation: false, // 关闭动画控件
+    timeline: false, // 关闭时间轴
+    fullscreenButton: false, // 关闭全屏按钮
+    baseLayer: false, // 关闭默认地图
+  });
+  // 清空logo
+  viewer.cesiumWidget.creditContainer.style.display = "none";
+
+  // 1. 定义几何体（矩形）
+  const rectangleGeometry = new Cesium.RectangleGeometry({
+    rectangle: Cesium.Rectangle.fromDegrees(116.3, 39.9, 116.5, 40.1),
+    vertexFormat: Cesium.PerInstanceColorAppearance.VERTEX_FORMAT,
+    height: 1000,
+  });
+
+  // 2. 创建几何实例（可包含实例属性）
+  const instance = new Cesium.GeometryInstance({
+    geometry: rectangleGeometry,
+    id: "rectangle-instance",
+    attributes: {
+      color: Cesium.ColorGeometryInstanceAttribute.fromColor(
+        Cesium.Color.RED.withAlpha(0.7)
+      ),
+      show: new Cesium.ShowGeometryInstanceAttribute(true),
+    },
+    modelMatrix: Cesium.Matrix4.IDENTITY.clone(),
+  });
+
+  // 3. 定义外观
+  const appearance = new Cesium.PerInstanceColorAppearance({
+    translucent: true,
+    closed: true,
+  });
+
+  // 4. 创建Primitive
+  const primitive = new Cesium.Primitive({
+    geometryInstances: instance,
+    appearance: appearance,
+    asynchronous: true, // 异步加载（大场景推荐）
+    releaseGeometryInstances: true, // 释放几何实例内存
+    compressVertices: true, // 压缩顶点数据
+    allowPicking: true, // 允许拾取
+  });
+
+  // 5. 添加到场景并监听状态
+  viewer.scene.primitives.add(primitive);
+
+  viewer.camera.setView({
+    destination: Cesium.Rectangle.fromDegrees(116.3, 39.8, 116.5, 40.19),
+    orientation: {
+      heading: Cesium.Math.toRadians(0),
+      pitch: Cesium.Math.toRadians(-90),
+      roll: 0,
+    },
+  });
+
+  initMap();
+});
+
+// 加载天地图
+const initMap = () => {
+  // 以下为天地图及天地图标注加载
+  const tiandituProvider = new Cesium.WebMapTileServiceImageryProvider({
+    url:
+      "http://{s}.tianditu.gov.cn/img_w/wmts?service=wmts&request=GetTile&version=1.0.0&LAYER=img&tileMatrixSet=w&TileMatrix={TileMatrix}&TileRow={TileRow}&TileCol={TileCol}&style=default&format=tiles&tk=" +
+      token,
+    layer: "img",
+    style: "default",
+    format: "tiles",
+    tileMatrixSetID: "w", // 天地图使用 Web 墨卡托投影（EPSG:3857），需确保 tileMatrixSetID: "w"
+    subdomains: ["t0", "t1", "t2", "t3", "t4", "t5", "t6", "t7"], // 子域名
+    maximumLevel: 18,
+    credit: new Cesium.Credit("天地图影像"),
+  });
+
+  // 添加地理标注
+  const labelProvider = new Cesium.WebMapTileServiceImageryProvider({
+    url:
+      "http://{s}.tianditu.gov.cn/cia_w/wmts?service=wmts&request=GetTile&version=1.0.0&LAYER=cia&tileMatrixSet=w&tileMatrix={TileMatrix}&tileRow={TileRow}&tileCol={TileCol}&style=default&format=tiles&tk=" +
+      token,
+    layer: "img",
+    style: "default",
+    format: "tiles",
+    tileMatrixSetID: "w",
+    subdomains: ["t0", "t1", "t2", "t3", "t4", "t5", "t6", "t7"], // 子域名轮询
+    maximumLevel: 18,
+    credit: new Cesium.Credit("天地图影像"),
+  });
+  // 天地图影像添加到viewer实例的影像图层集合中
+  viewer.imageryLayers.addImageryProvider(tiandituProvider);
+  // 天地图地理标注（后添加的会覆盖前面的）
+  viewer.imageryLayers.addImageryProvider(labelProvider);
+};
+</script>
+<style scoped>
+.container {
+  width: 100vw;
+  height: 100vh;
+}
+</style>
+```
+
+:::
+
+![矩形图元](../Aassets/Basics/pri.png)
 
 ### 与 Entity 的核心区别
 
 Entity 是基于 Primitive 的封装, 提供了更高级的 API, 更易用, 但性能不如 Primitive
 
-| 特性     | Primitive            | Entity       |
-| -------- | -------------------- | ------------ |
-| 抽象层级 | 低级别               | 高级别       |
-| 性能     | ⚡️ 更高（批量渲染） | 良好         |
-| 灵活性   | 🔧 极高（完全控制）  | 中等         |
-| 学习曲线 | 📈 陡峭              | 平缓         |
-| 最佳场景 | 大规模静态数据       | 动态交互对象 |
+| 特性         | Primitive                    | Entity                       | 技术本质   |
+| ------------ | ---------------------------- | ---------------------------- | ---------- |
+| **抽象层级** | 底层（接近 WebGL）           | 高层（声明式 API）           | 架构定位   |
+| **性能控制** | 完全手动控制                 | 自动优化                     | 性能管理   |
+| **内存占用** | 低（直接管理）               | 中（额外封装开销）           | 资源消耗   |
+| **动态更新** | 复杂（需重建或更新缓冲区）   | 简单（属性直接修改）         | 交互灵活性 |
+| **学习曲线** | 陡峭（需了解 WebGL 概念）    | 平缓（面向业务逻辑）         | 开发门槛   |
+| **适用规模** | 大规模静态数据（10 万+对象） | 中小规模动态对象（1 万以下） | 数据量级   |
 
 ## 核心配置项
 

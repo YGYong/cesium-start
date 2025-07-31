@@ -1,9 +1,6 @@
-## 效果
+# GUI 调试面板
 
-<video controls width="600">
-  <source src="../../Aassets/Practice/GUI.mp4" type="video/mp4" />
-  您的浏览器不支持HTML5视频标签。
-</video>
+## 介绍
 
 ```bash
 # 依赖安装
@@ -16,11 +13,16 @@ import * as dat from "dat.gui";
 const gui = new dat.GUI();
 ```
 
-## 源码
+1. 使用`dat.gui`创建调试面板
+2. 可以通过`gui.add()`方法添加控制项，支持多种类型的输入
+3. 调试面板可以用于实时修改变量值，便于调试和测试
+4. 调试面板可以通过`gui.domElement.style`设置样式
+
+:::details 展开代码
 
 ```vue
 <template>
-  <div ref="cesiumContainer" style="width: 100%; height: 90vh"></div>
+  <div ref="cesiumContainer" class="container"></div>
 </template>
 
 <script setup>
@@ -36,7 +38,10 @@ let roll = 0; // 翻滚角
 let obj = {};
 let model = null; // 模型对象
 
-onMounted(async () => {
+// 天地图TOKEN
+const token = "05be06461004055923091de7f3e51aa6";
+
+onMounted(() => {
   // 初始化Viewer
   viewer = new Cesium.Viewer(cesiumContainer.value, {
     geocoder: false, // 关闭地理编码搜索
@@ -47,16 +52,11 @@ onMounted(async () => {
     animation: false, // 关闭动画控件
     timeline: false, // 关闭时间轴
     fullscreenButton: false, // 关闭全屏按钮
-    // selectionIndicator: false,
-    // infoBox: false,
-    // 开启地形
-    // terrainProvider: await Cesium.createWorldTerrainAsync({
-    //   requestVertexNormals: true, // 真实光照效果
-    //   requestWaterMask: true, // 真实水面流动效果
-    // }),
+    baseLayer: false, // 关闭默认地图
   });
+  // 清空logo
+  viewer.cesiumWidget.creditContainer.style.display = "none";
 
-  // -------------------------------
   // 使用dat.gui添加GUI控制面板
   obj = {
     heading: 90,
@@ -134,43 +134,7 @@ onMounted(async () => {
       refresh();
     });
 
-  // -------------------------------
-
-  // ================================================
-  // 以下为天地图及天地图标注加载
-  const tiandituProvider = new Cesium.WebMapTileServiceImageryProvider({
-    url:
-      "http://{s}.tianditu.gov.cn/img_w/wmts?service=wmts&request=GetTile&version=1.0.0&LAYER=img&tileMatrixSet=w&TileMatrix={TileMatrix}&TileRow={TileRow}&TileCol={TileCol}&style=default&format=tiles&tk=" +
-      "05be06461004055923091de7f3e51aa6",
-    layer: "img",
-    style: "default",
-    format: "tiles",
-    tileMatrixSetID: "w", // 天地图使用 Web 墨卡托投影（EPSG:3857），需确保 tileMatrixSetID: "w"
-    subdomains: ["t0", "t1", "t2", "t3", "t4", "t5", "t6", "t7"], // 子域名
-    maximumLevel: 18,
-    credit: new Cesium.Credit("天地图影像"),
-  });
-
-  // 添加地理标注
-  const labelProvider = new Cesium.WebMapTileServiceImageryProvider({
-    url:
-      "http://{s}.tianditu.gov.cn/cia_w/wmts?service=wmts&request=GetTile&version=1.0.0&LAYER=cia&tileMatrixSet=w&tileMatrix={TileMatrix}&tileRow={TileRow}&tileCol={TileCol}&style=default&format=tiles&tk=" +
-      "05be06461004055923091de7f3e51aa6",
-    layer: "img",
-    style: "default",
-    format: "tiles",
-    tileMatrixSetID: "w",
-    subdomains: ["t0", "t1", "t2", "t3", "t4", "t5", "t6", "t7"], // 子域名轮询
-    maximumLevel: 18,
-    credit: new Cesium.Credit("天地图影像"),
-  });
-  // 添加到viewer实例的影像图层集合中
-  viewer.imageryLayers.addImageryProvider(labelProvider);
-  // 将天地图影像添加到viewer实例的影像图层集合中
-  const layer = viewer.imageryLayers.addImageryProvider(tiandituProvider);
-  layer.alpha = 0.6; // 设置透明度
-  // 清空logo
-  viewer.cesiumWidget.creditContainer.style.display = "none";
+  initMap();
 });
 
 // 刷新模型位置和朝向
@@ -185,5 +149,53 @@ const refresh = () => {
     )
   ); // 更新模型朝向
 };
+
+// 加载天地图
+const initMap = () => {
+  // 以下为天地图及天地图标注加载
+  const tiandituProvider = new Cesium.WebMapTileServiceImageryProvider({
+    url:
+      "http://{s}.tianditu.gov.cn/img_w/wmts?service=wmts&request=GetTile&version=1.0.0&LAYER=img&tileMatrixSet=w&TileMatrix={TileMatrix}&TileRow={TileRow}&TileCol={TileCol}&style=default&format=tiles&tk=" +
+      token,
+    layer: "img",
+    style: "default",
+    format: "tiles",
+    tileMatrixSetID: "w", // 天地图使用 Web 墨卡托投影（EPSG:3857），需确保 tileMatrixSetID: "w"
+    subdomains: ["t0", "t1", "t2", "t3", "t4", "t5", "t6", "t7"], // 子域名
+    maximumLevel: 18,
+    credit: new Cesium.Credit("天地图影像"),
+  });
+
+  // 添加地理标注
+  const labelProvider = new Cesium.WebMapTileServiceImageryProvider({
+    url:
+      "http://{s}.tianditu.gov.cn/cia_w/wmts?service=wmts&request=GetTile&version=1.0.0&LAYER=cia&tileMatrixSet=w&tileMatrix={TileMatrix}&tileRow={TileRow}&tileCol={TileCol}&style=default&format=tiles&tk=" +
+      token,
+    layer: "img",
+    style: "default",
+    format: "tiles",
+    tileMatrixSetID: "w",
+    subdomains: ["t0", "t1", "t2", "t3", "t4", "t5", "t6", "t7"], // 子域名轮询
+    maximumLevel: 18,
+    credit: new Cesium.Credit("天地图影像"),
+  });
+  // 天地图影像添加到viewer实例的影像图层集合中
+  viewer.imageryLayers.addImageryProvider(tiandituProvider);
+  // 天地图地理标注（后添加的会覆盖前面的）
+  viewer.imageryLayers.addImageryProvider(labelProvider);
+};
 </script>
+<style scoped>
+.container {
+  width: 100vw;
+  height: 100vh;
+}
+</style>
 ```
+
+:::
+
+<video controls width="600">
+  <source src="../../Aassets/Practice/GUI.mp4" type="video/mp4" />
+  您的浏览器不支持HTML5视频标签。
+</video>

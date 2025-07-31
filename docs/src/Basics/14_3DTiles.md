@@ -9,51 +9,284 @@
 - 当你移动时，动态加载新区域
 - 离得远时显示简化版，离得近时显示精细版可以参考 [3D Tiles 官方文档](https://github.com/CesiumGS/3d-tiles/tree/main/specification)。
 
+### 核心优势
+
+| 特性           | 说明                             | 价值               |
+| -------------- | -------------------------------- | ------------------ |
+| **分层细节**   | 根据视距动态加载不同精度模型     | 平衡性能与视觉质量 |
+| **空间索引**   | 基于四叉树/八叉树的瓦片组织      | 实现高效视锥体剔除 |
+| **流式传输**   | 按需加载可见区域数据             | 降低初始加载时间   |
+| **语义元数据** | 保留要素级属性信息               | 支持交互查询与分析 |
+| **格式开放**   | 基于 glTF 标准，兼容主流 3D 生态 | 确保长期可访问性   |
+
+### 应用场景
+
+- **城市建模**：加载百万级建筑模型
+- **地理信息**：融合地形、影像与矢量数据
+- **工程 BIM**：展示精细建筑构件与属性
+- **文化遗产**：数字化文物与遗址保护
+- **工业仿真**：工厂布局与设备管理
+- **元宇宙**：构建大规模虚拟空间
+
+### 与传统 3D 格式对比
+
+| 格式        | 优势                         | 劣势                   | 适用场景           |
+| ----------- | ---------------------------- | ---------------------- | ------------------ |
+| 3D Tiles    | 流式加载、LOD 管理、空间索引 | 规范复杂、生成工具依赖 | 大规模地理空间数据 |
+| glTF/GLB    | 轻量高效、生态成熟           | 无内置 LOD 和空间索引  | 单一场景模型       |
+| OBJ/FBX     | 兼容性广、工具支持好         | 体积大、不支持流式     | 小型模型交换       |
+| Point Cloud | 点云数据原生支持             | 可视化效果有限         | 激光扫描数据       |
+
+## 数据规范与结构
+
+### 核心文件组成
+
+一个完整的 3D Tiles 数据集包含：
+
+1. **tileset.json** - 数据集根描述文件
+
+   - 元数据与全局属性
+   - 瓦片层级结构定义
+   - 扩展功能声明
+
+2. **瓦片内容文件** - 实际 3D 数据
+
+   - glTF/GLB 模型
+   - 点云数据(.pnts)
+   - 复合瓦片(.cmpt)
+
+3. **元数据文件** - 属性定义与数据
+   - 模式定义(schema.json)
+   - 属性表(propertyTables)
+   - 批量元数据(batchTable)
+
+### tileset.json 结构解析
+
+```json
+{
+  "asset": {
+    "version": "1.1", // 规范版本
+    "tilesetVersion": "1.0.0" // 数据集版本
+  },
+  "geometricError": 500, // 根节点几何误差
+  "root": {
+    "boundingVolume": {
+      "region": [-180, -90, 180, 90, 0, 1000] // 经纬度范围+高度
+    },
+    "geometricError": 250, // 节点几何误差
+    "refine": "REPLACE", // 细化方式：REPLACE/ADD
+    "content": { "uri": "root.glb" }, // 瓦片内容
+    "children": [
+      /* 子瓦片 */
+    ]
+  },
+  "extensions": {
+    "3DTILES_metadata": {
+      /* 元数据定义 */
+    },
+    "3DTILES_implicit_tiling": {
+      /* 隐式瓦片配置 */
+    }
+  }
+}
+```
+
+## 加载与配置
+
 ### 加载全球建筑
 
 `createOsmBuildingsAsync` 为 Cesium OSM 建筑瓦片集创建一个 Cesium3DTileset 实例
 
-```js
-const tileset = await Cesium.createOsmBuildingsAsync();
-viewer.scene.primitives.add(tileset);
-// 定位到北京天安门
-viewer.camera.setView({
-  destination: Cesium.Cartesian3.fromDegrees(116.3911, 39.9067, 500),
-  orientation: {
-    heading: Cesium.Math.toRadians(0),
-    pitch: Cesium.Math.toRadians(-90),
-    roll: Cesium.Math.toRadians(0),
-  },
+:::details 展开代码
+
+```vue
+<template>
+  <div ref="cesiumContainer" class="container"></div>
+</template>
+
+<script setup>
+import { ref, onMounted } from "vue";
+import * as Cesium from "cesium";
+const cesiumContainer = ref(null);
+let viewer = null;
+
+// 天地图TOKEN
+const token = "05be06461004055923091de7f3e51aa6";
+
+onMounted(async () => {
+  // 初始化Viewer
+  viewer = new Cesium.Viewer(cesiumContainer.value, {
+    geocoder: false, // 关闭地理编码搜索
+    homeButton: false, // 关闭主页按钮
+    sceneModePicker: false, // 关闭场景模式选择器
+    baseLayerPicker: false, // 关闭底图选择器
+    navigationHelpButton: false, // 关闭导航帮助
+    animation: false, // 关闭动画控件
+    timeline: false, // 关闭时间轴
+    fullscreenButton: false, // 关闭全屏按钮
+    baseLayer: false, // 关闭默认地图
+  });
+  // 清空logo
+  viewer.cesiumWidget.creditContainer.style.display = "none";
+
+  // 添加OSM建筑物数据
+  const tileset = await Cesium.createOsmBuildingsAsync();
+  viewer.scene.primitives.add(tileset);
+  // 定位到北京天安门
+  viewer.camera.setView({
+    destination: Cesium.Cartesian3.fromDegrees(116.3911, 39.9067, 500),
+    orientation: {
+      heading: Cesium.Math.toRadians(0),
+      pitch: Cesium.Math.toRadians(-90),
+      roll: Cesium.Math.toRadians(0),
+    },
+  });
+
+  initMap();
 });
+
+// 加载天地图
+const initMap = () => {
+  // 以下为天地图及天地图标注加载
+  const tiandituProvider = new Cesium.WebMapTileServiceImageryProvider({
+    url:
+      "http://{s}.tianditu.gov.cn/img_w/wmts?service=wmts&request=GetTile&version=1.0.0&LAYER=img&tileMatrixSet=w&TileMatrix={TileMatrix}&TileRow={TileRow}&TileCol={TileCol}&style=default&format=tiles&tk=" +
+      token,
+    layer: "img",
+    style: "default",
+    format: "tiles",
+    tileMatrixSetID: "w", // 天地图使用 Web 墨卡托投影（EPSG:3857），需确保 tileMatrixSetID: "w"
+    subdomains: ["t0", "t1", "t2", "t3", "t4", "t5", "t6", "t7"], // 子域名
+    maximumLevel: 18,
+    credit: new Cesium.Credit("天地图影像"),
+  });
+
+  // 添加地理标注
+  const labelProvider = new Cesium.WebMapTileServiceImageryProvider({
+    url:
+      "http://{s}.tianditu.gov.cn/cia_w/wmts?service=wmts&request=GetTile&version=1.0.0&LAYER=cia&tileMatrixSet=w&tileMatrix={TileMatrix}&tileRow={TileRow}&tileCol={TileCol}&style=default&format=tiles&tk=" +
+      token,
+    layer: "img",
+    style: "default",
+    format: "tiles",
+    tileMatrixSetID: "w",
+    subdomains: ["t0", "t1", "t2", "t3", "t4", "t5", "t6", "t7"], // 子域名轮询
+    maximumLevel: 18,
+    credit: new Cesium.Credit("天地图影像"),
+  });
+  // 天地图影像添加到viewer实例的影像图层集合中
+  viewer.imageryLayers.addImageryProvider(tiandituProvider);
+  // 天地图地理标注（后添加的会覆盖前面的）
+  viewer.imageryLayers.addImageryProvider(labelProvider);
+};
+</script>
+<style scoped>
+.container {
+  width: 100vw;
+  height: 100vh;
+}
+</style>
 ```
+
+:::
 
 ![OsmBuildings](../Aassets/Basics/tiles.png)
 
-### 加载 3D Tiles 数据
+### 基础加载流程
 
 使用异步方法 `Cesium.Cesium3DTileset.fromUrl(url, options)` 加载 3D Tiles 数据集。
 
-options: [详情](https://cesium.com/learn/cesiumjs/ref-doc/Cesium3DTileset.html#.ConstructorOptions)
-
 - `maximumScreenSpaceError`: 最大屏幕空间误差，值越小越精细（默认 16）
 
-```js
-// 创建3D Tileset
-const tileset = await Cesium.Cesium3DTileset.fromUrl(
-  new URL("./models/Tileset/tileset.json", import.meta.url).href,
-  {
-    maximumScreenSpaceError: 16, // 最大屏幕空间误差
-    maximumMemoryUsage: 512, // 最大内存使用量
-    skipLevelOfDetail: true, // 跳过细节层级
-    dynamicScreenSpaceError: true, // 动态屏幕空间误差
-    dynamicScreenSpaceErrorDensity: 0.001, // 动态屏幕空间误差密度
-  }
-);
-viewer.scene.primitives.add(tileset);
-viewer.zoomTo(tileset); // 缩放到3D Tileset
+:::details 展开代码
+
+```vue
+<template>
+  <div ref="cesiumContainer" class="container"></div>
+</template>
+
+<script setup>
+import { ref, onMounted } from "vue";
+import * as Cesium from "cesium";
+const cesiumContainer = ref(null);
+let viewer = null;
+
+onMounted(async () => {
+  // 初始化Viewer
+  viewer = new Cesium.Viewer(cesiumContainer.value, {
+    geocoder: false, // 关闭地理编码搜索
+    homeButton: false, // 关闭主页按钮
+    sceneModePicker: false, // 关闭场景模式选择器
+    baseLayerPicker: false, // 关闭底图选择器
+    navigationHelpButton: false, // 关闭导航帮助
+    animation: false, // 关闭动画控件
+    timeline: false, // 关闭时间轴
+    fullscreenButton: false, // 关闭全屏按钮
+  });
+  // 清空logo
+  viewer.cesiumWidget.creditContainer.style.display = "none";
+
+  // 添加3D Tileset
+  const tileset = await Cesium.Cesium3DTileset.fromUrl(
+    new URL("./models/Tileset/tileset.json", import.meta.url).href,
+    {
+      maximumScreenSpaceError: 16, // 最大屏幕空间误差
+      maximumMemoryUsage: 512, // 最大内存使用量
+      skipLevelOfDetail: true, // 跳过细节层级
+      dynamicScreenSpaceError: true, // 动态屏幕空间误差
+      dynamicScreenSpaceErrorDensity: 0.001, // 动态屏幕空间误差密度
+    }
+  );
+  viewer.scene.primitives.add(tileset);
+  viewer.zoomTo(tileset); // 缩放到3D Tileset
+});
+</script>
+<style scoped>
+.container {
+  width: 100vw;
+  height: 100vh;
+}
+</style>
 ```
 
-#### 查看属性
+:::
+
+![3D Tileset 加载](../Aassets/Basics/tiles3.png)
+
+### 关键配置参数
+
+| 参数                      | 类型    | 默认值 | 说明               | 性能影响 |
+| ------------------------- | ------- | ------ | ------------------ | -------- |
+| `maximumScreenSpaceError` | Number  | 16     | 最大屏幕空间误差   | 高       |
+| `maximumMemoryUsage`      | Number  | 512    | 最大内存使用(MB)   | 中       |
+| `skipLevelOfDetail`       | Boolean | false  | 是否跳过中间 LOD   | 高       |
+| `dynamicScreenSpaceError` | Boolean | false  | 动态误差计算       | 中       |
+| `cullWithChildrenBounds`  | Boolean | true   | 使用子瓦片边界剔除 | 中       |
+| `preloadAncestors`        | Boolean | true   | 预加载父瓦片       | 低       |
+| `preloadSiblings`         | Boolean | false  | 预加载兄弟瓦片     | 高       |
+
+### 加载状态监听
+
+```js
+// 监听加载进度
+tileset.loadProgress.addEventListener(function (
+  numberOfPendingRequests,
+  numberOfTilesProcessing
+) {
+  if (numberOfPendingRequests === 0 && numberOfTilesProcessing === 0) {
+    console.log("Stopped loading");
+    return;
+  }
+
+  console.log(
+    `Loading: requests: ${numberOfPendingRequests}, processing: ${numberOfTilesProcessing}`
+  );
+});
+```
+
+## 高级功能应用
+
+### 属性查询与交互
 
 添加点击事件，当前点击的瓦片会变为黄色，并打印出该瓦片的属性。
 
@@ -80,7 +313,7 @@ viewer.screenSpaceEventHandler.setInputAction((click) => {
 viewer.extend(Cesium.viewerCesium3DTilesInspectorMixin);
 ```
 
-#### 添加样式(按条件着色)
+#### 样式表达与可视化
 
 文档: [Cesium3DTileStyle](https://cesium.com/learn/cesiumjs/ref-doc/Cesium3DTileStyle.html?classFilter=Cesium3DTileStyle)
 
@@ -88,10 +321,10 @@ viewer.extend(Cesium.viewerCesium3DTilesInspectorMixin);
 tileset.style = new Cesium.Cesium3DTileStyle({
   color: {
     conditions: [
-      ["${Height} >= 80", "color('purple')"],
-      ["${Height} >= 50", "color('red')"],
-      ["${Height} >= 10", "color('green')"],
-      ["true", "color('blue')"],
+      ["${Height} >= 80", "color('purple')"], // 高楼红色
+      ["${Height} >= 50", "color('red')"], // 中楼橙色
+      ["${Height} >= 10", "color('green')"], // 低楼绿色
+      ["true", "color('blue')"], // 其他蓝色
     ],
   },
 });
