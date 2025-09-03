@@ -3,8 +3,20 @@ import { defineConfig } from "vitepress";
 // https://vitepress.dev/reference/site-config
 export default defineConfig({
   title: "Cesium快速入门",
-  description: "Cesium docs",
-  head: [["link", { rel: "icon", href: "/favicon.ico" }]],
+  sitemap: {
+    hostname: "http://c.ygyong.cn",
+  },
+  description: "Cesium快速入门、Cesium中文网、Cesium案例集合",
+  head: [
+    ["link", { rel: "icon", href: "/favicon.ico" }],
+    [
+      "meta",
+      {
+        name: "description",
+        content: "Cesium快速入门、Cesium中文网、Cesium案例集合、Webgis入门",
+      },
+    ],
+  ],
   srcDir: "src",
   // lastUpdated: true,
   themeConfig: {

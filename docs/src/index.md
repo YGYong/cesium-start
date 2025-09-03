@@ -3,9 +3,12 @@
 layout: home
 
 hero:
-  name: "Cesium中文学习"
-  text: "Vue3 & Cesium"
-  # tagline: Vue中使用Cesium
+  name: "Cesium开发指南"
+  text: "Cesium入门教程"
+  tagline: 深入Cesium开发 | Cesium原理剖析 | 最佳实践分享
+  image:
+    src: /logistic.svg
+    alt: Cesium
   actions:
     - theme: brand
       text: 快速进入
