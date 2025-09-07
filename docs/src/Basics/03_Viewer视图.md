@@ -4,6 +4,12 @@
 
 ![viewer](../Aassets/Basics/viewer.png)
 
+## Viewer 与 Scene 和 Camera 的关系
+
+- `Viewer 是 Cesium 的核心类，包含 Scene 和 Camera`
+- `Scene 是渲染场景的核心对象，包含 Globe、Primitive、Entity 等`
+- `Camera 控制场景视角，是 Scene 的一部分`
+
 ## 创建 Viewer 实例
 
 ```js
@@ -65,6 +71,8 @@ viewer.cesiumWidget.creditContainer.style.display = "none";
 ```
 
 #### 完整代码
+
+这里加载的天地图，注意需要关闭默认底图加载，`baseLayer: false,`
 
 :::details 展开代码
 
@@ -136,6 +144,7 @@ const initMap = () => {
 | 配置项                 | 描述                                                          | 默认值                                        |
 | ---------------------- | ------------------------------------------------------------- | --------------------------------------------- |
 | `baseLayer`            | 底图提供者，用于加载地图图层                                  | `ImageryLayer.fromWorldImagery()`             |
+| `globe`                | 地球配置，用于控制地球显示                                    | `new Globe(options.ellipsoid)`                |
 | `terrainProvider`      | 地形提供者，用于加载地形数据                                  | `new EllipsoidTerrainProvider()`              |
 | `shouldAnimate`        | 是否启用动画播放（如时间轴）                                  | `false`                                       |
 | `sceneMode`            | 场景模式（`SCENE2D`、`SCENE3D`、`COLUMBUS_VIEW`、`MORPHING`） | `SceneMode.SCENE3D`                           |
@@ -145,9 +154,43 @@ const initMap = () => {
 | `contextOptions`       | WebGL 上下文配置选项，用于定制渲染管线                        |                                               |
 | `useDefaultRenderLoop` | 是否使用默认渲染循环                                          | `true`                                        |
 
-### 场景管理核心（`viewer.scene`）
+### Scene 场景管理核心（`viewer.scene`）
 
-`viewer.scene` 是场景渲染的核心对象，负责管理相机、地球、天空、光照等关键组件。
+Scene 是 Cesium 虚拟场景中所有 3D 图形对象和状态的容器，通常不直接创建，而是由 CesiumWidget 隐式创建。它负责管理场景中的所有元素，`包括地球、地形、模型、实体等，同时处理光照、阴影、大气效果等渲染`相关属性。
+
+#### 初始化配置
+
+Scene 的初始化配置主要通过构造函数参数实现：
+
+```js
+const scene = new Cesium.Scene({
+  canvas: canvas, // HTML canvas 元素
+  contextOptions: {
+    // WebGL 上下文属性
+    webgl: {
+      alpha: false, // 默认 false，设置为 true 可实现 alpha 混合
+      antialias: true, // 抗锯齿
+      depth: true, // 深度测试
+      stencil: false,
+    },
+    allowTextureFilterAnisotropic: true, // 各向异性纹理过滤
+  },
+  mapProjection: new Cesium.GeographicProjection(), // 2D 和 Columbus 视图的地图投影
+  orderIndependentTranslucency: true, // 顺序无关的半透明性
+  scene3DOnly: false, // 是否仅优化 3D 模式性能
+  shadows: false, // 是否启用太阳阴影
+  mapMode2D: Cesium.MapMode2D.INFINITE_SCROLL, // 2D 地图模式
+  requestRenderMode: false, // 是否启用按需渲染
+  maximumRenderTimeChange: 0.0, // 最大渲染时间变化
+});
+```
+
+关键参数说明：
+
+- `webgl.alpha`: 默认为 false，设置为 true 可将 Cesium 合成在其他 HTML 元素上方，但会降低性能
+- `allowTextureFilterAnisotropic`: 默认为 true，启用各向异性纹理过滤，提高视觉质量
+- `scene3DOnly`: 设置为 true 可优化 3D 模式内存使用和性能，但禁用 2D 和 Columbus 视图
+- `requestRenderMode`: 启用后仅在场景变化时渲染，提高性能
 
 #### 地球显示控制
 
@@ -197,7 +240,7 @@ viewer.scene.backgroundColor = Cesium.Color.SKYBLUE;
 实现步骤：
 
 1. 准备 6 张立方体贴图（正 X/负 X/正 Y/负 Y/正 Z/负 Z）
-2. 通过 `SkyBox` 类加载并应用
+2. 通过 `SkyBox` 类加载应用
 
 :::details 展开代码
 
@@ -248,7 +291,6 @@ onMounted(() => {
       negativeZ: pz,
     },
   });
-
   initMap();
 });
 
@@ -262,29 +304,13 @@ const initMap = () => {
     layer: "img",
     style: "default",
     format: "tiles",
-    tileMatrixSetID: "w", // 天地图使用 Web 墨卡托投影（EPSG:3857），需确保 tileMatrixSetID: "w"
-    subdomains: ["t0", "t1", "t2", "t3", "t4", "t5", "t6", "t7"], // 子域名
-    maximumLevel: 18,
-    credit: new Cesium.Credit("天地图影像"),
-  });
-
-  // 添加地理标注
-  const labelProvider = new Cesium.WebMapTileServiceImageryProvider({
-    url:
-      "http://{s}.tianditu.gov.cn/cia_w/wmts?service=wmts&request=GetTile&version=1.0.0&LAYER=cia&tileMatrixSet=w&tileMatrix={TileMatrix}&tileRow={TileRow}&tileCol={TileCol}&style=default&format=tiles&tk=" +
-      token,
-    layer: "img",
-    style: "default",
-    format: "tiles",
     tileMatrixSetID: "w",
-    subdomains: ["t0", "t1", "t2", "t3", "t4", "t5", "t6", "t7"], // 子域名轮询
+    subdomains: ["t0", "t1", "t2", "t3", "t4", "t5", "t6", "t7"], // 子域名
     maximumLevel: 18,
     credit: new Cesium.Credit("天地图影像"),
   });
   // 天地图影像添加到viewer实例的影像图层集合中
   viewer.imageryLayers.addImageryProvider(tiandituProvider);
-  // 天地图地理标注（后添加的会覆盖前面的）
-  viewer.imageryLayers.addImageryProvider(labelProvider);
 };
 </script>
 <style scoped>
@@ -312,9 +338,20 @@ const viewer = new Cesium.Viewer(cesiumContainer.value, {
 
 // 调整大气层亮度
 viewer.scene.skyAtmosphere.brightnessShift = 0.5; // 默认0
+viewer.scene.skyAtmosphere.hueShift = 0.1; // 色调偏移
+viewer.scene.skyAtmosphere.saturationShift = -0.2; // 饱和度偏移
 ```
 
 ![大气层](../Aassets/Basics/skyAtmosphere.png)
+
+#### 光照控制
+
+```js
+// 启用环境光遮蔽
+viewer.scene.globe.enableLighting = true;
+```
+
+![光照控制](../Aassets/Basics/03_光照控制.png)
 
 #### 性能监控
 
@@ -406,7 +443,7 @@ const initMap = () => {
     layer: "img",
     style: "default",
     format: "tiles",
-    tileMatrixSetID: "w", // 天地图使用 Web 墨卡托投影（EPSG:3857），需确保 tileMatrixSetID: "w"
+    tileMatrixSetID: "w",
     subdomains: ["t0", "t1", "t2", "t3", "t4", "t5", "t6", "t7"], // 子域名
     maximumLevel: 18,
     credit: new Cesium.Credit("天地图影像"),
@@ -442,34 +479,28 @@ const initMap = () => {
 .popup-window {
   position: absolute;
   padding: 12px 18px;
-  background-color: rgba(
-    44,
-    62,
-    80,
-    0.85
-  ); /* Darker background with transparency */
-  color: #ecf0f1; /* Light text color */
-  border: 1px solid #3498db; /* A more vibrant blue border */
+  background-color: rgba(44, 62, 80, 0.85);
+  color: #ecf0f1;
+  border: 1px solid #3498db;
   border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3); /* Soft shadow for depth */
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
   font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
   font-size: 14px;
   text-align: center;
   min-width: 120px;
-  pointer-events: none; /* Allows interaction with map underneath */
-  transform: translate(-50%, -100%); /* Adjust to center above the point */
+  pointer-events: none;
+  transform: translate(-50%, -100%);
 }
 
-/* Optional: Add a small arrow/tail to the popup */
 .popup-window::after {
   content: "";
   position: absolute;
-  bottom: -10px; /* Position below the popup */
+  bottom: -10px;
   left: 50%;
   transform: translateX(-50%);
   border-width: 10px 10px 0;
   border-style: solid;
-  border-color: #3498db transparent transparent transparent; /* Matches border color */
+  border-color: #3498db transparent transparent transparent;
   display: block;
   width: 0;
   height: 0;
@@ -478,12 +509,12 @@ const initMap = () => {
 .popup-window::before {
   content: "";
   position: absolute;
-  bottom: -9px; /* Slightly above the border arrow */
+  bottom: -9px;
   left: 50%;
   transform: translateX(-50%);
   border-width: 9px 9px 0;
   border-style: solid;
-  border-color: rgba(44, 62, 80, 0.85) transparent transparent transparent; /* Matches background color */
+  border-color: rgba(44, 62, 80, 0.85) transparent transparent transparent;
   display: block;
   width: 0;
   height: 0;
@@ -581,6 +612,8 @@ viewer.flyTo(dataSource);
 ```
 
 > **注意**：`GeoJsonDataSource.load` 是异步方法，需使用 `await` 或 `.then()` 处理。
+
+![GeoJson数据添加](../Aassets/Basics/03_添加GeoJSon.png)
 
 ### 地形可视化
 
@@ -688,32 +721,120 @@ viewer.scene.postRender.addEventListener(function () {
 
 1. **实体批处理**：对于大量实体，使用 `Primitive` 统一管理
 
-```js
-// 添加大量广告牌集合
-const billboardCollection = viewer.scene.primitives.add(
-  new Cesium.BillboardCollection()
-);
-for (let i = 0; i < 50000; i++) {
-  billboardCollection.add({
-    position: Cesium.Cartesian3.fromDegrees(
-      Math.random() * 360 - 180, // 经度
-      Math.random() * 180 - 90, // 纬度
-      50
-    ),
-    image: "/src/assets/vue.svg", // 替换为实际图片路径
-    width: 32,
-    height: 32,
-    scaleByDistance: new Cesium.NearFarScalar(10000, 1.0, 100000, 0.1), // 按距离缩放：避免远处图标浪费像素
+下面案例使用`BillboardCollection`和`Primitive`添加五万个图标，同时保证高性能渲染
+
+:::details 点击查看代码
+
+```vue
+<template>
+  <div ref="cesiumContainer" class="container"></div>
+</template>
+
+<script setup>
+import { ref, onMounted } from "vue";
+import * as Cesium from "cesium";
+const cesiumContainer = ref(null);
+let viewer = null;
+
+// 天地图TOKEN
+const token = "05be06461004055923091de7f3e51aa6";
+
+onMounted(() => {
+  // 初始化Viewer
+  viewer = new Cesium.Viewer(cesiumContainer.value, {
+    geocoder: false, // 关闭地理编码搜索
+    homeButton: false, // 关闭主页按钮
+    sceneModePicker: false, // 关闭场景模式选择器
+    baseLayerPicker: false, // 关闭底图选择器
+    navigationHelpButton: false, // 关闭导航帮助
+    animation: false, // 关闭动画控件
+    timeline: false, // 关闭时间轴
+    fullscreenButton: false, // 关闭全屏按钮
+    baseLayer: false, // 关闭默认地图
   });
+  // 清空logo
+  viewer.cesiumWidget.creditContainer.style.display = "none";
+  initMap();
+
+  // 添加大量广告牌集合
+  const billboardCollection = viewer.scene.primitives.add(
+    new Cesium.BillboardCollection()
+  );
+  for (let i = 0; i < 50000; i++) {
+    billboardCollection.add({
+      position: Cesium.Cartesian3.fromDegrees(
+        Math.random() * 360 - 180, // 经度
+        Math.random() * 180 - 90, // 纬度
+        50
+      ),
+      image: "/src/assets/vue.svg", // 替换为实际图片路径
+      width: 32,
+      height: 32,
+      scaleByDistance: new Cesium.NearFarScalar(10000, 1.0, 100000, 0.1), // 按距离缩放：避免远处图标浪费像素
+    });
+  }
+});
+
+// 加载天地图
+const initMap = () => {
+  // 以下为天地图及天地图标注加载
+  const tiandituProvider = new Cesium.WebMapTileServiceImageryProvider({
+    url:
+      "http://{s}.tianditu.gov.cn/img_w/wmts?service=wmts&request=GetTile&version=1.0.0&LAYER=img&tileMatrixSet=w&TileMatrix={TileMatrix}&TileRow={TileRow}&TileCol={TileCol}&style=default&format=tiles&tk=" +
+      token,
+    layer: "img",
+    style: "default",
+    format: "tiles",
+    tileMatrixSetID: "w",
+    subdomains: ["t0", "t1", "t2", "t3", "t4", "t5", "t6", "t7"], // 子域名
+    maximumLevel: 18,
+    credit: new Cesium.Credit("天地图影像"),
+  });
+  // 天地图影像添加到viewer实例的影像图层集合中
+  viewer.imageryLayers.addImageryProvider(tiandituProvider);
+};
+</script>
+<style scoped>
+.container {
+  width: 100vw;
+  height: 100vh;
 }
+</style>
 ```
+
+:::
+
+![实体批处理](../Aassets/Basics/03_海量数据.png)
 
 2. **按需渲染**：启用请求渲染模式减少不必要的渲染
 
 ```js
 viewer.scene.requestRenderMode = true;
-viewer.scene.maximumRenderTimeChange = 0.0; // 渲染间隔（秒）
+viewer.scene.maximumRenderTimeChange = 0.2; // 渲染间隔（秒）
 ```
+
+## 图层管理最佳实践
+
+### 问题背景
+
+在 Cesium 中切换地图图层时，常见的错误做法是使用`viewer.imageryLayers.removeAll()`移除现有图层，然后添加新图层。这种方式会导致图层对象被销毁，当再次尝试使用这些对象时会抛出"This object was destroyed"错误。
+
+### 推荐方案：控制图层显隐而非移除
+
+通过控制图层的`show`属性来切换显示状态，避免对象销毁问题：
+
+1. **统一存储结构**：使用数组存储不同类型的图层
+2. **初始加载所有图层**：一次性添加所有图层到 viewer，但默认隐藏
+3. **切换时控制显隐**：通过修改`show`属性切换图层显示状态
+
+[案例详见](./04_添加底图.md)添加底图中的综合案例
+
+### 优势
+
+1. **避免对象销毁错误**：图层始终存在于 viewer 中，不会被销毁
+2. **提升切换性能**：无需重新创建图层对象和加载资源
+3. **简化逻辑**：统一的显隐控制方式，易于维护和扩展
+4. **支持复杂图层组合**：可同时显示多个地图类型的图层（如叠加不同数据源）
 
 ## Viewer 生命周期管理
 
@@ -734,14 +855,17 @@ function destroyViewer() {
 
 ## 常用方法速查表
 
-| 方法                             | 描述                                                             |
-| -------------------------------- | ---------------------------------------------------------------- |
-| `zoomTo(target, offset)`         | 相机自动调整到指定实体的视野                                     |
-| `viewer.zoomTo(viewer.entities)` | 缩放到所有实体                                                   |
-| `flyTo(target, options)`         | 相机平滑过渡到指定实体的位置                                     |
-| `camera.setView(options)`        | 立即设置相机位置                                                 |
-| `camera.flyTo(options)`          | 相机平滑过渡到指定位置（与`viewer.flyTo`的区别在于直接操作相机） |
-| `trackedEntity`                  | 锁定相机视角跟随实体移动（适合动态目标跟踪）                     |
-| `entities.add()`                 | 添加实体到场景                                                   |
-| `scene.pick(position)`           | 根据屏幕坐标拾取场景中的实体                                     |
-| `destroy()`                      | 销毁 Viewer 实例，释放资源                                       |
+| 方法                              | 描述                                                             |
+| --------------------------------- | ---------------------------------------------------------------- |
+| `zoomTo(target, offset)`          | 相机自动调整到指定实体的视野                                     |
+| `viewer.zoomTo(viewer.entities)`  | 缩放到所有实体                                                   |
+| `flyTo(target, options)`          | 相机平滑过渡到指定实体的位置                                     |
+| `camera.setView(options)`         | 立即设置相机位置                                                 |
+| `camera.flyTo(options)`           | 相机平滑过渡到指定位置（与`viewer.flyTo`的区别在于直接操作相机） |
+| `trackedEntity`                   | 锁定相机视角跟随实体移动（适合动态目标跟踪）                     |
+| `entities.add()`                  | 添加实体到场景                                                   |
+| `scene.pick(position)`            | 根据屏幕坐标拾取场景中的实体                                     |
+| `destroy()`                       | 销毁 Viewer 实例，释放资源                                       |
+| `dataSources.add(source)`         | 添加数据源（如 GeoJSON）到场景                                   |
+| `dataSources.remove(source)`      | 从场景中移除数据源                                               |
+| `clock.onTick.addEventListener()` | 监听时间轴变化事件                                               |
