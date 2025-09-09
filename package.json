@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "vitepress dev docs",
     "docs:dev": "vitepress dev docs",
+    "build": "vitepress build docs",
     "docs:build": "vitepress build docs",
     "docs:preview": "vitepress preview docs"
   }
