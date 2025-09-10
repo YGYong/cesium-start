@@ -118,7 +118,7 @@ const initMap = () => {
     layer: "img",
     style: "default",
     format: "tiles",
-    tileMatrixSetID: "w", // 天地图使用 Web 墨卡托投影（EPSG:3857），需确保 tileMatrixSetID: "w"
+    tileMatrixSetID: "w",
     subdomains: ["t0", "t1", "t2", "t3", "t4", "t5", "t6", "t7"], // 子域名
     maximumLevel: 18,
     credit: new Cesium.Credit("天地图影像"),
