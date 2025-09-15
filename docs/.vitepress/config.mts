@@ -29,7 +29,7 @@ export default defineConfig({
     // https://vitepress.dev/reference/default-theme-config
     nav: [
       { text: "基础", link: "/Basics/00_简介.md" },
-      { text: "实践", link: "/Practice/基础/1000_声明.md" },
+      { text: "实践", link: "/Practice/声明.md" },
       {
         text: "外部链接",
         items: [
@@ -60,6 +60,10 @@ export default defineConfig({
           {
             text: "cesium.xin",
             link: "http://cesium.xin/",
+          },
+          {
+            text: "vue for cesium",
+            link: "https://zouyaoji.top/vue-cesium/#/zh-CN",
           },
         ],
       },
@@ -97,24 +101,61 @@ export default defineConfig({
         {
           text: "实践",
           items: [
-            { text: "声明", link: "/Practice/基础/1000_声明.md" },
-            { text: "公共函数", link: "/Practice/基础/00_公共函数.md" },
+            { text: "声明", link: "/Practice/声明.md" },
+            { text: "公共函数", link: "/Practice/公共函数.md" },
             {
               text: "基础案例",
+              collapsed: false,
               items: [
-                { text: "网格", link: "/Practice/基础/01_网格.md" },
-                { text: "飞机飞行", link: "/Practice/基础/02_飞机飞行.md" },
-                { text: "加载控件", link: "/Practice/基础/03_加载控件.md" },
-                { text: "GUI调试", link: "/Practice/基础/04_GUI调试.md" },
-                { text: "动态时序图", link: "/Practice/基础/05_动态时序图.md" },
-                { text: "沿线标注", link: "/Practice/基础/06_沿线标注.md" },
+                { text: "初始化", link: "/Practice/基础/01_初始化.md" },
+                { text: "天地图影像", link: "/Practice/基础/02_天地图影像.md" },
+                { text: "天地图标注", link: "/Practice/基础/03_天地图标注.md" },
+                { text: "高德地图", link: "/Practice/基础/04_高德地图.md" },
+                { text: "顶级影像", link: "/Practice/基础/05_顶级影像.md" },
+                {
+                  text: "底图切换综合案例",
+                  link: "/Practice/基础/06_底图综合案例.md",
+                },
+                { text: "气泡窗口", link: "/Practice/基础/07_气泡窗口.md" },
+                {
+                  text: "自定义天空盒",
+                  link: "/Practice/基础/08_自定义天空盒.md",
+                },
+                {
+                  text: "加载GeoJSON",
+                  link: "/Practice/基础/09_加载GeoJSON.md",
+                },
+                { text: "海量图标", link: "/Practice/基础/10_海量图标.md" },
+                {
+                  text: "默认相机视角",
+                  link: "/Practice/基础/11_默认相机视角.md",
+                },
+                {
+                  text: "相机常用方法",
+                  link: "/Practice/基础/12_相机常用方法.md",
+                },
+                {
+                  text: "键盘控制相机交互",
+                  link: "/Practice/基础/13_键盘控制相机交互.md",
+                },
+                {
+                  text: "坐标系转换",
+                  link: "/Practice/基础/14_坐标系转换.md",
+                },
               ],
             },
-
-            // { text: "实践2", link: "/Practice/01_.md" },
-            // { text: "实践3", link: "/Practice/02_.md" },
-            // { text: "实践4", link: "/Practice/03_.md" },
-            // { text: "实践5", link: "/Practice/04_.md" },
+            {
+              text: "进阶案例",
+              collapsed: true,
+              items: [
+                { text: "网格", link: "/Practice/进阶/01_网格.md" },
+                { text: "飞机飞行", link: "/Practice/进阶/02_飞机飞行.md" },
+                { text: "加载控件", link: "/Practice/进阶/03_加载控件.md" },
+                { text: "GUI调试", link: "/Practice/进阶/04_GUI调试.md" },
+                { text: "动态时序图", link: "/Practice/进阶/05_动态时序图.md" },
+                { text: "沿线标注", link: "/Practice/进阶/06_沿线标注.md" },
+              ],
+            },
           ],
         },
       ],
