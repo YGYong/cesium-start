@@ -31,7 +31,15 @@ export default defineConfig({
       { text: "基础", link: "/Basics/00_简介.md" },
       { text: "实践", link: "/Practice/声明.md" },
       {
-        text: "外部链接",
+        text: "官网更新日志",
+        link: "/UpdateLog/cesiumlog.md",
+      },
+      {
+        text: "赞助",
+        link: "/Sponsor/赞助.md",
+      },
+      {
+        text: "相关社区",
         items: [
           {
             text: "Cesium 官网",
@@ -54,6 +62,10 @@ export default defineConfig({
             link: "https://geojson.cn/data/atlas/china",
           },
           {
+            text: "GeoJson数据（含区县）",
+            link: "https://datav.aliyun.com/portal/school/atlas/area_selector",
+          },
+          {
             text: "Cesium-Examples",
             link: "https://github.com/jiawanlong/Cesium-Examples",
           },
@@ -66,10 +78,6 @@ export default defineConfig({
             link: "https://zouyaoji.top/vue-cesium/#/zh-CN",
           },
         ],
-      },
-      {
-        text: "更新日志",
-        link: "/UpdateLog/cesiumlog.md",
       },
     ],
 
@@ -86,7 +94,7 @@ export default defineConfig({
             { text: "坐标系", link: "/Basics/06_坐标系" },
             { text: "事件系统", link: "/Basics/07_事件" },
             { text: "实体类型", link: "/Basics/08_实体" },
-            { text: "材质", link: "/Basics/09_材质" },
+            { text: "实体材质", link: "/Basics/09_实体材质" },
             { text: "Primitive图元", link: "/Basics/10_Primitive图元" },
             { text: "Appearance外观", link: "/Basics/11_Appearance外观" },
             { text: "自定义材质", link: "/Basics/12_自定义材质" },
@@ -108,39 +116,129 @@ export default defineConfig({
               collapsed: false,
               items: [
                 { text: "初始化", link: "/Practice/基础/01_初始化.md" },
-                { text: "天地图影像", link: "/Practice/基础/02_天地图影像.md" },
-                { text: "天地图标注", link: "/Practice/基础/03_天地图标注.md" },
-                { text: "高德地图", link: "/Practice/基础/04_高德地图.md" },
-                { text: "顶级影像", link: "/Practice/基础/05_顶级影像.md" },
                 {
-                  text: "底图切换综合案例",
-                  link: "/Practice/基础/06_底图综合案例.md",
-                },
-                { text: "气泡窗口", link: "/Practice/基础/07_气泡窗口.md" },
-                {
-                  text: "自定义天空盒",
-                  link: "/Practice/基础/08_自定义天空盒.md",
-                },
-                {
-                  text: "加载GeoJSON",
-                  link: "/Practice/基础/09_加载GeoJSON.md",
-                },
-                { text: "海量图标", link: "/Practice/基础/10_海量图标.md" },
-                {
-                  text: "默认相机视角",
-                  link: "/Practice/基础/11_默认相机视角.md",
+                  text: "底图加载",
+                  collapsed: true,
+                  items: [
+                    {
+                      text: "天地图影像",
+                      link: "/Practice/基础/02_天地图影像.md",
+                    },
+                    {
+                      text: "天地图标注",
+                      link: "/Practice/基础/03_天地图标注.md",
+                    },
+                    { text: "高德地图", link: "/Practice/基础/04_高德地图.md" },
+                    { text: "顶级影像", link: "/Practice/基础/05_顶级影像.md" },
+                    {
+                      text: "底图切换综合案例",
+                      link: "/Practice/基础/06_底图综合案例.md",
+                    },
+                  ],
                 },
                 {
-                  text: "相机常用方法",
-                  link: "/Practice/基础/12_相机常用方法.md",
+                  text: "Viewer视图",
+                  collapsed: true,
+                  items: [
+                    { text: "气泡窗口", link: "/Practice/基础/07_气泡窗口.md" },
+                    {
+                      text: "自定义天空盒",
+                      link: "/Practice/基础/08_自定义天空盒.md",
+                    },
+                    {
+                      text: "加载GeoJSON",
+                      link: "/Practice/基础/09_加载GeoJSON.md",
+                    },
+                    { text: "海量图标", link: "/Practice/基础/10_海量图标.md" },
+                  ],
                 },
                 {
-                  text: "键盘控制相机交互",
-                  link: "/Practice/基础/13_键盘控制相机交互.md",
+                  text: "相机控制",
+                  collapsed: true,
+                  items: [
+                    {
+                      text: "默认相机视角",
+                      link: "/Practice/基础/11_默认相机视角.md",
+                    },
+                    {
+                      text: "相机常用方法",
+                      link: "/Practice/基础/12_相机常用方法.md",
+                    },
+                    {
+                      text: "键盘控制相机交互",
+                      link: "/Practice/基础/13_键盘控制相机交互.md",
+                    },
+                  ],
                 },
                 {
-                  text: "坐标系转换",
-                  link: "/Practice/基础/14_坐标系转换.md",
+                  text: "坐标系转化及事件",
+                  collapsed: true,
+                  items: [
+                    {
+                      text: "坐标系转换",
+                      link: "/Practice/基础/14_坐标系转换.md",
+                    },
+                    { text: "屏幕事件", link: "/Practice/基础/15_屏幕事件.md" },
+                    { text: "相机事件", link: "/Practice/基础/16_相机事件.md" },
+                    { text: "渲染事件", link: "/Practice/基础/17_渲染事件.md" },
+                  ],
+                },
+                {
+                  text: "实体基础案例",
+                  collapsed: true,
+                  items: [
+                    { text: "实体点", link: "/Practice/基础/18_实体点.md" },
+                    { text: "聚合点", link: "/Practice/基础/19_聚合点.md" },
+                    { text: "实体线", link: "/Practice/基础/20_实体线.md" },
+                    { text: "实体面", link: "/Practice/基础/21_实体面.md" },
+                    { text: "带孔洞面", link: "/Practice/基础/22_带孔洞面.md" },
+                    { text: "模型加载", link: "/Practice/基础/23_模型加载.md" },
+                    { text: "模型动画", link: "/Practice/基础/24_模型动画.md" },
+                    { text: "模型裁剪", link: "/Practice/基础/25_模型裁剪.md" },
+                    { text: "标签", link: "/Practice/基础/26_标签.md" },
+                    { text: "广告牌", link: "/Practice/基础/27_广告牌.md" },
+                    { text: "矩形", link: "/Practice/基础/28_矩形.md" },
+                    { text: "墙", link: "/Practice/基础/29_墙.md" },
+                    { text: "椭圆", link: "/Practice/基础/30_椭圆.md" },
+                    { text: "椭圆体", link: "/Practice/基础/31_椭圆体.md" },
+                    { text: "圆柱体", link: "/Practice/基础/32_圆柱体.md" },
+                    { text: "箱", link: "/Practice/基础/33_箱.md" },
+                    { text: "走廊", link: "/Practice/基础/34_走廊.md" },
+                    {
+                      text: "实体生命周期",
+                      link: "/Practice/基础/35_实体生命周期.md",
+                    },
+                  ],
+                },
+                {
+                  text: "材质基础案例",
+                  collapsed: true,
+                  items: [
+                    {
+                      text: "动态颜色材质",
+                      link: "/Practice/基础/36_动态颜色材质.md",
+                    },
+                    { text: "图片材质", link: "/Practice/基础/37_图片材质.md" },
+                    { text: "棋盘材质", link: "/Practice/基础/38_棋盘材质.md" },
+                    { text: "条纹材质", link: "/Practice/基础/39_条纹材质.md" },
+                    { text: "网格材质", link: "/Practice/基础/40_网格材质.md" },
+                    {
+                      text: "折线发光材质",
+                      link: "/Practice/基础/41_折线发光材质.md",
+                    },
+                    {
+                      text: "折线轮廓材质",
+                      link: "/Practice/基础/42_折线轮廓材质.md",
+                    },
+                    {
+                      text: "折线虚线材质",
+                      link: "/Practice/基础/43_折线虚线材质.md",
+                    },
+                    {
+                      text: "折线箭头材质",
+                      link: "/Practice/基础/44_折线箭头材质.md",
+                    },
+                  ],
                 },
               ],
             },
