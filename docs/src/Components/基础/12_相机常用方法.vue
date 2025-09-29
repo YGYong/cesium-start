@@ -1,0 +1,112 @@
+<template>
+  <div ref="cesiumContainer" class="container"></div>
+</template>
+
+<script setup>
+import { ref, onMounted } from "vue";
+import * as Cesium from "cesium";
+const cesiumContainer = ref(null);
+let viewer = null;
+
+// 天地图TOKEN
+const token = "2b34f6afbcd235c2bc4bed3f7735f1f5";
+
+onMounted(() => {
+  // 初始化Viewer
+  viewer = new Cesium.Viewer(cesiumContainer.value, {
+    geocoder: false, // 关闭地理编码搜索
+    homeButton: false, // 关闭主页按钮
+    sceneModePicker: false, // 关闭场景模式选择器
+    baseLayerPicker: false, // 关闭底图选择器
+    navigationHelpButton: false, // 关闭导航帮助
+    animation: false, // 关闭动画控件
+    timeline: false, // 关闭时间轴
+    fullscreenButton: false, // 关闭全屏按钮
+    baseLayer: false, // 关闭默认地图
+  });
+  // 清空logo
+  viewer.cesiumWidget.creditContainer.style.display = "none";
+  initMap();
+
+  const camera = viewer.camera;
+
+  // 获取相机位置（笛卡尔坐标）
+  const position = camera.position;
+  // 获取相机方向矩阵
+  const directionMatrix = camera.direction;
+  // 获取相机方位角
+  const heading = camera.heading;
+  // 获取相机俯仰角
+  const pitch = camera.pitch;
+  // 获取相机滚动角
+  const roll = camera.roll;
+  // 获取相机高度（米）
+  const height = camera.positionCartographic.height;
+  console.log(position, "相机位置");
+  console.log(directionMatrix, "相机方向矩阵");
+  console.log(heading, "相机方位角");
+  console.log(pitch, "相机俯仰角");
+  console.log(roll, "相机滚动角");
+  console.log(height, "相机高度");
+
+  // 使相机固定看向一个点、同理还有setView、flyTo控制相机
+  viewer.camera.lookAt(
+    Cesium.Cartesian3.fromDegrees(116.404, 39.915, 0),
+    new Cesium.HeadingPitchRange(
+      Cesium.Math.toRadians(30), // 方位角：30°（东北方向）
+      Cesium.Math.toRadians(-20), // 俯仰角：-20°（俯视）
+      1000 // 距离目标点的距离（米）
+    )
+  );
+
+  // 5s后恢复自由控制
+  setTimeout(() => {
+    viewer.camera.lookAtTransform(Cesium.Matrix4.IDENTITY);
+  }, 5000);
+
+  // 相机移动开始事件
+  viewer.camera.moveStart.addEventListener(function () {
+    console.log("相机开始移动");
+    // 可在此处暂停其他动画或更新UI状态
+  });
+
+  // 相机移动结束事件（常用）
+  viewer.camera.moveEnd.addEventListener(function () {
+    console.log("相机移动结束");
+    // 获取新视域范围
+    const viewRectangle = viewer.camera.computeViewRectangle();
+    if (Cesium.defined(viewRectangle)) {
+      const west = Cesium.Math.toDegrees(viewRectangle.west).toFixed(2);
+      const east = Cesium.Math.toDegrees(viewRectangle.east).toFixed(2);
+      const south = Cesium.Math.toDegrees(viewRectangle.south).toFixed(2);
+      const north = Cesium.Math.toDegrees(viewRectangle.north).toFixed(2);
+      console.log(`当前视域范围: ${west}°E-${east}°E, ${south}°N-${north}°N`);
+    }
+  });
+});
+
+// 加载天地图
+const initMap = () => {
+  // 以下为天地图及天地图标注加载
+  const tiandituProvider = new Cesium.WebMapTileServiceImageryProvider({
+    url:
+      "http://{s}.tianditu.gov.cn/img_w/wmts?service=wmts&request=GetTile&version=1.0.0&LAYER=img&tileMatrixSet=w&TileMatrix={TileMatrix}&TileRow={TileRow}&TileCol={TileCol}&style=default&format=tiles&tk=" +
+      token,
+    layer: "img",
+    style: "default",
+    format: "tiles",
+    tileMatrixSetID: "w",
+    subdomains: ["t0", "t1", "t2", "t3", "t4", "t5", "t6", "t7"], // 子域名
+    maximumLevel: 18,
+    credit: new Cesium.Credit("天地图影像"),
+  });
+  // 天地图影像添加到viewer实例的影像图层集合中
+  viewer.imageryLayers.addImageryProvider(tiandituProvider);
+};
+</script>
+<style scoped>
+.container {
+  width: 60vw;
+  height: 60vh;
+}
+</style>

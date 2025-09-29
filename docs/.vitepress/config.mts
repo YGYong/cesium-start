@@ -1,4 +1,7 @@
 import { defineConfig } from "vitepress";
+import cesium from "vite-plugin-cesium";
+import { resolve } from "path";
+import { VueReplMdPlugin } from "vitepress-plugin-vue-repl";
 
 // https://vitepress.dev/reference/site-config
 export default defineConfig({
@@ -30,10 +33,10 @@ export default defineConfig({
     nav: [
       { text: "基础", link: "/Basics/00_简介.md" },
       { text: "实践", link: "/Practice/声明.md" },
-      {
-        text: "官网更新日志",
-        link: "/UpdateLog/cesiumlog.md",
-      },
+      // {
+      //   text: "官网更新日志",
+      //   link: "/UpdateLog/cesiumlog.md",
+      // },
       {
         text: "赞助",
         link: "/Sponsor/赞助.md",
@@ -66,6 +69,10 @@ export default defineConfig({
             link: "https://datav.aliyun.com/portal/school/atlas/area_selector",
           },
           {
+            text: "GeoJSON边界数据",
+            link: "https://geojson.hxkj.vip/",
+          },
+          {
             text: "Cesium-Examples",
             link: "https://github.com/jiawanlong/Cesium-Examples",
           },
@@ -96,12 +103,10 @@ export default defineConfig({
             { text: "实体类型", link: "/Basics/08_实体" },
             { text: "实体材质", link: "/Basics/09_实体材质" },
             { text: "Primitive图元", link: "/Basics/10_Primitive图元" },
-            { text: "Appearance外观", link: "/Basics/11_Appearance外观" },
-            { text: "自定义材质", link: "/Basics/12_自定义材质" },
             { text: "日期与时钟", link: "/Basics/13_日期与时钟" },
             { text: "3D_Tiles", link: "/Basics/14_3DTiles" },
             { text: "数据加载", link: "/Basics/15_数据加载" },
-            { text: "常用实例", link: "/Basics/17_常用实例.md" },
+            { text: "专业名词", link: "/Basics/66_专业名词.md" },
           ],
         },
       ],
@@ -184,7 +189,7 @@ export default defineConfig({
                   ],
                 },
                 {
-                  text: "实体基础案例",
+                  text: "实体基础",
                   collapsed: true,
                   items: [
                     { text: "实体点", link: "/Practice/基础/18_实体点.md" },
@@ -211,7 +216,7 @@ export default defineConfig({
                   ],
                 },
                 {
-                  text: "材质基础案例",
+                  text: "材质基础",
                   collapsed: true,
                   items: [
                     {
@@ -238,6 +243,61 @@ export default defineConfig({
                       text: "折线箭头材质",
                       link: "/Practice/基础/44_折线箭头材质.md",
                     },
+                  ],
+                },
+                {
+                  text: "Primitive",
+                  collapsed: true,
+                  items: [
+                    {
+                      text: "矩形图元",
+                      link: "/Practice/基础/45_矩形图元.md",
+                    },
+                    {
+                      text: "箱图元",
+                      link: "/Practice/基础/46_箱图元.md",
+                    },
+                    {
+                      text: "添加模型",
+                      link: "/Practice/基础/47_添加模型.md",
+                    },
+                    {
+                      text: "PerInstanceColorAppearance",
+                      link: "/Practice/基础/48_PerInstanceColorAppearance.md",
+                    },
+                    {
+                      text: "EllipsoidSurfaceAppearance",
+                      link: "/Practice/基础/49_EllipsoidSurfaceAppearance.md",
+                    },
+                    {
+                      text: "PolylineMaterialAppearance",
+                      link: "/Practice/基础/50_PolylineMaterialAppearance.md",
+                    },
+                  ],
+                },
+                {
+                  text: "3D Tiles",
+                  collapsed: true,
+                  items: [
+                    { text: "全球OSM", link: "/Practice/基础/51_全球OSM.md" },
+                    {
+                      text: "加载状态监听",
+                      link: "/Practice/基础/52_3DTiles加载状态监听.md",
+                    },
+                    {
+                      text: "点击事件及样式表达式",
+                      link: "/Practice/基础/53_点击事件及样式表达式.md",
+                    },
+                  ],
+                },
+                {
+                  text: "数据加载",
+                  collapsed: true,
+                  items: [
+                    { text: "GeoJSON", link: "/Practice/基础/54_GeoJSON.md" },
+                    { text: "区域掩膜", link: "/Practice/基础/55_区域掩膜.md" },
+                    { text: "CZML", link: "/Practice/基础/56_CZML.md" },
+                    { text: "KML", link: "/Practice/基础/57_KML.md" },
                   ],
                 },
               ],
@@ -275,6 +335,19 @@ export default defineConfig({
     // lastUpdatedText: "最后更新时间",
     search: {
       provider: "local",
+    },
+  },
+  markdown: {
+    config: (md) => {
+      md.use(VueReplMdPlugin);
+    },
+  },
+  vite: {
+    plugins: [cesium()],
+    resolve: {
+      alias: {
+        "@": resolve(__dirname, ".", "../src/"),
+      },
     },
   },
 });

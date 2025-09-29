@@ -1,0 +1,161 @@
+<template>
+  <div ref="cesiumContainer" class="container"></div>
+</template>
+
+<script setup>
+import { ref, onMounted } from "vue";
+import * as Cesium from "cesium";
+const cesiumContainer = ref(null);
+let viewer = null;
+let aircraftEntity = null; // 用于存储飞机实体
+
+// 天地图TOKEN
+const token = "2b34f6afbcd235c2bc4bed3f7735f1f5";
+
+onMounted(() => {
+  // 初始化Viewer
+  viewer = new Cesium.Viewer(cesiumContainer.value, {
+    geocoder: false, // 关闭地理编码搜索
+    homeButton: false, // 关闭主页按钮
+    sceneModePicker: false, // 关闭场景模式选择器
+    baseLayerPicker: false, // 关闭底图选择器
+    navigationHelpButton: false, // 关闭导航帮助
+    animation: false, // 关闭动画控件
+    timeline: false, // 关闭时间轴
+    fullscreenButton: false, // 关闭全屏按钮
+    baseLayer: false, // 关闭默认地图
+  });
+  // 清空logo
+  viewer.cesiumWidget.creditContainer.style.display = "none";
+  initMap();
+
+  // 飞机从南京飞到上海漫游飞行案例
+
+  // 设置起始时间
+  const startTime = Cesium.JulianDate.now();
+  // 设置结束时间，飞行时间为15s
+  const endTime = Cesium.JulianDate.addSeconds(
+    startTime,
+    15,
+    new Cesium.JulianDate()
+  );
+  // 设置飞行路径 南京-> 无锡 -> 苏州 -> 上海
+  const flightPath = [
+    Cesium.Cartesian3.fromDegrees(118.7969, 32.0603, 2000), // 南京
+    Cesium.Cartesian3.fromDegrees(120.3014, 31.5742, 2000), // 无锡
+    Cesium.Cartesian3.fromDegrees(120.6196, 31.2993, 2000), // 苏州
+    Cesium.Cartesian3.fromDegrees(121.4737, 31.2304, 2000), // 上海
+  ];
+
+  // 创建一个时间动态的路径
+  const path = new Cesium.SampledPositionProperty();
+  flightPath.forEach((position, index) => {
+    const time = Cesium.JulianDate.addSeconds(
+      startTime,
+      index * 5, // 每个位置间隔5秒
+      new Cesium.JulianDate()
+    );
+    path.addSample(time, position);
+  });
+
+  // 创建一个飞机模型实体
+  aircraftEntity = viewer.entities.add({
+    name: "Aircraft",
+    // 添加到集合中的区间数组
+    availability: new Cesium.TimeIntervalCollection([
+      new Cesium.TimeInterval({
+        start: startTime,
+        stop: endTime,
+      }),
+    ]),
+    position: path,
+    model: {
+      uri: new URL("./models/Cesium_Air.glb", import.meta.url).href,
+      minimumPixelSize: 128,
+      silhouetteSize: 3, // 设置轮廓大小
+      scale: 10.0, // 设置模型缩放比例
+    },
+    orientation: new Cesium.VelocityOrientationProperty(path), // 根据采样点，计算模型朝向
+    path: {
+      show: true,
+      resolution: 120, // 路径分辨率
+      width: 5, // 路径宽度
+      material: new Cesium.PolylineGlowMaterialProperty({
+        glowPower: 0.1, // 光晕强度
+        color: Cesium.Color.YELLOW, // 光晕颜色
+      }),
+    },
+  });
+  // // 设置时间动态, clone是为了避免startTime修改后, 影响到viewer.clock的时间设置
+  viewer.clock.startTime = startTime.clone(); // 设置开始时间
+  viewer.clock.stopTime = endTime.clone(); // 设置结束时间
+  viewer.clock.currentTime = startTime.clone(); // 设置当前时间
+  viewer.clock.clockRange = Cesium.ClockRange.LOOP_STOP; // 循环播放
+  // viewer.clock.multiplier = 5; // 设置时间倍率
+  // viewer.timeline.zoomTo(startTime, endTime); // 设置时间轴范围 需timeline为true
+
+  // 开启动画
+  viewer.clock.shouldAnimate = true;
+
+  // 视角跟随飞机
+  // viewer.trackedEntity = aircraftEntity;
+
+  // 第一人称
+  viewer.scene.preUpdate.addEventListener(() => {
+    let center = aircraftEntity.position.getValue(viewer.clock.currentTime);
+    let orientation = aircraftEntity.orientation.getValue(
+      viewer.clock.currentTime
+    );
+    let transform = Cesium.Transforms.eastNorthUpToFixedFrame(center);
+    transform = Cesium.Matrix4.fromRotationTranslation(
+      Cesium.Matrix3.fromQuaternion(orientation),
+      center
+    );
+    viewer.camera.lookAtTransform(
+      transform,
+      new Cesium.Cartesian3(-10, 0, 300000)
+    );
+  });
+});
+
+// 加载天地图
+const initMap = () => {
+  // 以下为天地图及天地图标注加载
+  const tiandituProvider = new Cesium.WebMapTileServiceImageryProvider({
+    url:
+      "http://{s}.tianditu.gov.cn/img_w/wmts?service=wmts&request=GetTile&version=1.0.0&LAYER=img&tileMatrixSet=w&TileMatrix={TileMatrix}&TileRow={TileRow}&TileCol={TileCol}&style=default&format=tiles&tk=" +
+      token,
+    layer: "img",
+    style: "default",
+    format: "tiles",
+    tileMatrixSetID: "w",
+    subdomains: ["t0", "t1", "t2", "t3", "t4", "t5", "t6", "t7"], // 子域名
+    maximumLevel: 18,
+    credit: new Cesium.Credit("天地图影像"),
+  });
+
+  // 添加地理标注
+  const labelProvider = new Cesium.WebMapTileServiceImageryProvider({
+    url:
+      "http://{s}.tianditu.gov.cn/cia_w/wmts?service=wmts&request=GetTile&version=1.0.0&LAYER=cia&tileMatrixSet=w&tileMatrix={TileMatrix}&tileRow={TileRow}&tileCol={TileCol}&style=default&format=tiles&tk=" +
+      token,
+    layer: "img",
+    style: "default",
+    format: "tiles",
+    tileMatrixSetID: "w",
+    subdomains: ["t0", "t1", "t2", "t3", "t4", "t5", "t6", "t7"], // 子域名轮询
+    maximumLevel: 18,
+    credit: new Cesium.Credit("天地图影像"),
+  });
+  // 天地图影像添加到viewer实例的影像图层集合中
+  viewer.imageryLayers.addImageryProvider(tiandituProvider);
+  // 天地图地理标注（后添加的会覆盖前面的）
+  viewer.imageryLayers.addImageryProvider(labelProvider);
+};
+</script>
+<style scoped>
+.container {
+  width: 60vw;
+  height: 60vh;
+}
+</style>

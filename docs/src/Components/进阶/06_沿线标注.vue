@@ -1,0 +1,367 @@
+<template>
+  <div ref="cesiumContainer" class="container"></div>
+</template>
+
+<script setup>
+import { ref, onMounted, onBeforeUnmount } from "vue";
+import * as Cesium from "cesium";
+
+const cesiumContainer = ref(null);
+let viewer = null;
+
+const labelCollection = new Cesium.LabelCollection();
+const lineEntities = [];
+const labelPool = [];
+const viewModel = {
+  labelsVisible: true,
+  minDistance: 100,
+  fontSize: 16,
+  fontFamily: "Microsoft YaHei",
+  outlineWidth: 2,
+  scale: 1.0,
+  maxDistance: Number.POSITIVE_INFINITY,
+};
+
+const token = "2b34f6afbcd235c2bc4bed3f7735f1f5";
+
+onMounted(() => {
+  viewer = new Cesium.Viewer(cesiumContainer.value, {
+    geocoder: false,
+    homeButton: false,
+    sceneModePicker: false,
+    baseLayerPicker: false,
+    navigationHelpButton: false,
+    animation: false,
+    timeline: false,
+    fullscreenButton: false,
+    baseLayer: false,
+  });
+  viewer.cesiumWidget.creditContainer.style.display = "none";
+
+  viewer.scene.primitives.add(labelCollection);
+
+  Cesium.GeoJsonDataSource.load(
+    new URL("./json/line.geojson", import.meta.url).href,
+    {
+      stroke: Cesium.Color.BLUE,
+      strokeWidth: 2,
+    }
+  ).then((dataSource) => {
+    viewer.zoomTo(dataSource);
+    viewer.dataSources.add(dataSource);
+
+    const entities = dataSource.entities.values;
+    for (let i = 0; i < entities.length; i++) {
+      const entity = entities[i];
+      if (entity.polyline) {
+        lineEntities.push(entity);
+        initLabelForEntity(entity);
+      }
+    }
+    startLabelUpdater();
+  });
+  initMap();
+});
+
+const initLabelForEntity = (entity) => {
+  const label = labelCollection.add({
+    show: false,
+    text: entity.name || "未命名线路",
+    font: `${viewModel.fontSize}px ${viewModel.fontFamily}`,
+    fillColor: Cesium.Color.RED,
+    outlineColor: Cesium.Color.BLACK,
+    outlineWidth: viewModel.outlineWidth,
+    style: Cesium.LabelStyle.FILL_AND_OUTLINE,
+    pixelOffset: new Cesium.Cartesian2(0, -20),
+    scale: viewModel.scale,
+    disableDepthTestDistance: Number.POSITIVE_INFINITY,
+  });
+
+  labelPool.push({
+    label,
+    entity,
+    lastPosition: new Cesium.Cartesian3(),
+    lastUpdate: 0,
+  });
+};
+
+const startLabelUpdater = () => {
+  viewer.scene.postRender.addEventListener(updateVisibleLabels);
+};
+
+const updateVisibleLabels = () => {
+  if (!viewModel.labelsVisible) return;
+
+  const now = Cesium.getTimestamp();
+  const camera = viewer.scene.camera;
+
+  labelPool.forEach((item) => {
+    item.label.show = false;
+  });
+
+  const cullingVolume = camera.frustum.computeCullingVolume(
+    camera.position,
+    camera.direction,
+    camera.up
+  );
+
+  const visibleEntities = lineEntities.filter((entity) => {
+    const positions = entity.polyline.positions.getValue(
+      Cesium.JulianDate.now()
+    );
+    const boundingSphere = Cesium.BoundingSphere.fromPoints(positions);
+
+    const visibility = cullingVolume.computeVisibility(boundingSphere);
+    return visibility !== Cesium.Intersect.OUTSIDE;
+  });
+
+  visibleEntities.sort((a, b) => {
+    const aCenter = getPolylineCenter(a);
+    const bCenter = getPolylineCenter(b);
+
+    const aDist = Cesium.Cartesian3.distance(aCenter, camera.position);
+    const bDist = Cesium.Cartesian3.distance(bCenter, camera.position);
+    return aDist - bDist;
+  });
+
+  const placedPositions = [];
+  visibleEntities.forEach((entity) => {
+    const item = labelPool.find((i) => i.entity === entity);
+    if (!item) return;
+
+    const positions = entity.polyline.positions.getValue(
+      Cesium.JulianDate.now()
+    );
+    const labelPosition = calculateBestLabelPosition(
+      positions,
+      placedPositions
+    );
+
+    if (labelPosition) {
+      Cesium.Cartesian3.clone(labelPosition, item.lastPosition);
+      item.label.position = labelPosition;
+      item.label.show = true;
+      item.lastUpdate = now;
+
+      placedPositions.push({
+        position: labelPosition,
+        time: now,
+      });
+    }
+  });
+
+  for (let i = placedPositions.length - 1; i >= 0; i--) {
+    if (now - placedPositions[i].time > 3000) {
+      placedPositions.splice(i, 1);
+    }
+  }
+};
+
+function getPolylineCenter(entity) {
+  const positions = entity.polyline.positions.getValue(Cesium.JulianDate.now());
+  const boundingSphere = Cesium.BoundingSphere.fromPoints(positions);
+  return boundingSphere.center;
+}
+
+function calculateBestLabelPosition(positions, placedPositions) {
+  const scratchCartesian = new Cesium.Cartesian3();
+  const scratchWindowPosition = new Cesium.Cartesian2();
+
+  const screenMargin = 50;
+  const screenBounds = {
+    left: screenMargin,
+    right: viewer.canvas.width - screenMargin,
+    top: screenMargin,
+    bottom: viewer.canvas.height - screenMargin,
+  };
+
+  const screenCenter = new Cesium.Cartesian2(
+    viewer.canvas.width / 2,
+    viewer.canvas.height / 2
+  );
+
+  let bestPosition = null;
+  let bestScore = -1;
+
+  for (let i = 0; i < positions.length; i++) {
+    const position = positions[i];
+
+    const windowPos = Cesium.SceneTransforms.worldToWindowCoordinates(
+      viewer.scene,
+      position,
+      scratchWindowPosition
+    );
+
+    if (!windowPos) continue;
+
+    if (
+      windowPos.x < screenBounds.left ||
+      windowPos.x > screenBounds.right ||
+      windowPos.y < screenBounds.top ||
+      windowPos.y > screenBounds.bottom
+    ) {
+      continue;
+    }
+
+    if (!isPositionValid(position, placedPositions, screenBounds)) {
+      continue;
+    }
+
+    const distanceToCenter = Cesium.Cartesian2.distance(
+      windowPos,
+      screenCenter
+    );
+    const maxDistance = Math.sqrt(
+      Math.pow(viewer.canvas.width / 2, 2) +
+        Math.pow(viewer.canvas.height / 2, 2)
+    );
+    const score = 1 - distanceToCenter / maxDistance;
+
+    if (score > bestScore) {
+      bestScore = score;
+      bestPosition = position;
+    }
+  }
+
+  if (bestPosition) {
+    return bestPosition;
+  }
+
+  const testPoints = [
+    Math.floor(positions.length * 0.5),
+    Math.floor(positions.length * 0.25),
+    Math.floor(positions.length * 0.75),
+  ];
+
+  for (const index of testPoints) {
+    if (index >= 0 && index < positions.length) {
+      const position = positions[index];
+      if (isPositionValid(position, placedPositions, screenBounds)) {
+        return position;
+      }
+    }
+  }
+
+  for (let i = 1; i < positions.length; i++) {
+    const segmentCenter = Cesium.Cartesian3.lerp(
+      positions[i - 1],
+      positions[i],
+      0.5,
+      scratchCartesian
+    );
+
+    if (isPositionValid(segmentCenter, placedPositions, screenBounds)) {
+      return segmentCenter;
+    }
+  }
+
+  return null;
+}
+
+const isPositionValid = (position, placedPositions, screenBounds = null) => {
+  const camera = viewer.scene.camera;
+
+  const cullingVolume = camera.frustum.computeCullingVolume(
+    camera.position,
+    camera.direction,
+    camera.up
+  );
+
+  const boundingSphere = new Cesium.BoundingSphere(position, 1);
+
+  if (
+    cullingVolume.computeVisibility(boundingSphere) === Cesium.Intersect.OUTSIDE
+  ) {
+    return false;
+  }
+
+  const windowPosition = Cesium.SceneTransforms.worldToWindowCoordinates(
+    viewer.scene,
+    position
+  );
+
+  if (!windowPosition) return false;
+
+  if (screenBounds) {
+    if (
+      windowPosition.x < screenBounds.left ||
+      windowPosition.x > screenBounds.right ||
+      windowPosition.y < screenBounds.top ||
+      windowPosition.y > screenBounds.bottom
+    ) {
+      return false;
+    }
+  } else {
+    if (
+      windowPosition.x < 0 ||
+      windowPosition.x > viewer.canvas.width ||
+      windowPosition.y < 0 ||
+      windowPosition.y > viewer.canvas.height
+    ) {
+      return false;
+    }
+  }
+
+  for (const placed of placedPositions) {
+    const placedWindowPos = Cesium.SceneTransforms.worldToWindowCoordinates(
+      viewer.scene,
+      placed.position
+    );
+
+    if (
+      placedWindowPos &&
+      Cesium.Cartesian2.distance(windowPosition, placedWindowPos) <
+        viewModel.minDistance
+    ) {
+      return false;
+    }
+  }
+
+  return true;
+};
+
+onBeforeUnmount(() => {
+  if (viewer) {
+    viewer.scene.postRender.removeEventListener(updateVisibleLabels);
+    viewer.destroy();
+  }
+});
+
+const initMap = () => {
+  const tiandituProvider = new Cesium.WebMapTileServiceImageryProvider({
+    url:
+      "http://{s}.tianditu.gov.cn/img_w/wmts?service=wmts&request=GetTile&version=1.0.0&LAYER=img&tileMatrixSet=w&TileMatrix={TileMatrix}&tileRow={TileRow}&TileCol={TileCol}&style=default&format=tiles&tk=" +
+      token,
+    layer: "img",
+    style: "default",
+    format: "tiles",
+    tileMatrixSetID: "w",
+    subdomains: ["t0", "t1", "t2", "t3", "t4", "t5", "t6", "t7"],
+    maximumLevel: 18,
+    credit: new Cesium.Credit("天地图影像"),
+  });
+
+  const labelProvider = new Cesium.WebMapTileServiceImageryProvider({
+    url:
+      "http://{s}.tianditu.gov.cn/cia_w/wmts?service=wmts&request=GetTile&version=1.0.0&LAYER=cia&tileMatrixSet=w&tileMatrix={TileMatrix}&tileRow={TileRow}&tileCol={TileCol}&style=default&format=tiles&tk=" +
+      token,
+    layer: "img",
+    style: "default",
+    format: "tiles",
+    tileMatrixSetID: "w",
+    subdomains: ["t0", "t1", "t2", "t3", "t4", "t5", "t6", "t7"],
+    maximumLevel: 18,
+    credit: new Cesium.Credit("天地图影像"),
+  });
+
+  viewer.imageryLayers.addImageryProvider(tiandituProvider);
+  viewer.imageryLayers.addImageryProvider(labelProvider);
+};
+</script>
+
+<style scoped>
+.container {
+  width: 60vw;
+  height: 60vh;
+}
+</style>

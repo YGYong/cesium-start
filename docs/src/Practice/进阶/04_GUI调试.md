@@ -18,6 +18,13 @@ const gui = new dat.GUI();
 3. 调试面板可以用于实时修改变量值，便于调试和测试
 4. 调试面板可以通过`gui.domElement.style`设置样式
 
+<video controls width="600">
+  <source src="../../Aassets/Practice/GUI.mp4" type="video/mp4" />
+  您的浏览器不支持HTML5视频标签。
+</video>
+
+## 完整代码
+
 :::details 展开代码
 
 ```vue
@@ -39,7 +46,7 @@ let obj = {};
 let model = null; // 模型对象
 
 // 天地图TOKEN
-const token = "05be06461004055923091de7f3e51aa6";
+const token = "2b34f6afbcd235c2bc4bed3f7735f1f5";
 
 onMounted(() => {
   // 初始化Viewer
@@ -56,6 +63,8 @@ onMounted(() => {
   });
   // 清空logo
   viewer.cesiumWidget.creditContainer.style.display = "none";
+
+  initMap();
 
   // 使用dat.gui添加GUI控制面板
   obj = {
@@ -90,7 +99,8 @@ onMounted(() => {
       new Cesium.HeadingPitchRoll(heading, pitch, roll)
     ), // 设置模型朝向
     model: {
-      uri: "/src/cesium/models/baby/scene.gltf", // 替换为实际模型路径
+      // uri: "/src/cesium/models/baby/scene.gltf", // 替换为实际模型路径
+      uri: new URL("./models//baby/scene.gltf", import.meta.url).href,
       minimumPixelSize: 128, // 最小像素大小
       maximumScale: 20000, // 最大缩放比例
     },
@@ -133,8 +143,6 @@ onMounted(() => {
     .onChange(() => {
       refresh();
     });
-
-  initMap();
 });
 
 // 刷新模型位置和朝向
@@ -160,7 +168,7 @@ const initMap = () => {
     layer: "img",
     style: "default",
     format: "tiles",
-    tileMatrixSetID: "w", // 天地图使用 Web 墨卡托投影（EPSG:3857），需确保 tileMatrixSetID: "w"
+    tileMatrixSetID: "w",
     subdomains: ["t0", "t1", "t2", "t3", "t4", "t5", "t6", "t7"], // 子域名
     maximumLevel: 18,
     credit: new Cesium.Credit("天地图影像"),
@@ -195,7 +203,7 @@ const initMap = () => {
 
 :::
 
-<video controls width="600">
-  <source src="../../Aassets/Practice/GUI.mp4" type="video/mp4" />
-  您的浏览器不支持HTML5视频标签。
-</video>
+<Demo />
+<script setup>
+import Demo from '@/Components/进阶/04_GUI调试.vue'
+</script>

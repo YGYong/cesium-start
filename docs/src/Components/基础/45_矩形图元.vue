@@ -1,0 +1,101 @@
+<template>
+  <div ref="cesiumContainer" class="container"></div>
+</template>
+
+<script setup>
+import { ref, onMounted } from "vue";
+import * as Cesium from "cesium";
+const cesiumContainer = ref(null);
+let viewer = null;
+
+// 天地图TOKEN
+const token = "05be06461004055923091de7f3e51aa6";
+
+onMounted(async () => {
+  // 初始化Viewer
+  viewer = new Cesium.Viewer(cesiumContainer.value, {
+    geocoder: false, // 关闭地理编码搜索
+    homeButton: false, // 关闭主页按钮
+    sceneModePicker: false, // 关闭场景模式选择器
+    baseLayerPicker: false, // 关闭底图选择器
+    navigationHelpButton: false, // 关闭导航帮助
+    animation: false, // 关闭动画控件
+    timeline: false, // 关闭时间轴
+    fullscreenButton: false, // 关闭全屏按钮
+    baseLayer: false, // 关闭默认地图
+  });
+  // 清空logo
+  viewer.cesiumWidget.creditContainer.style.display = "none";
+  initMap();
+
+  // 1. 创建矩形几何
+  const rectangle = Cesium.Rectangle.fromDegrees(116.3, 39.9, 116.5, 40.1);
+  const geometry = new Cesium.RectangleGeometry({
+    rectangle: rectangle,
+    vertexFormat: Cesium.EllipsoidSurfaceAppearance.VERTEX_FORMAT, // 使用默认的顶点格式
+    height: 10000,
+  });
+
+  // 2. 创建几何实例
+  const instance = new Cesium.GeometryInstance({
+    geometry: geometry,
+    attributes: {
+      color: new Cesium.ColorGeometryInstanceAttribute(1.0, 0.0, 0.0, 0.5),
+    },
+  });
+
+  // 3. 定义外观
+  const appearance = new Cesium.EllipsoidSurfaceAppearance({
+    // 材质定义,checkerboard 是一个内置的材质类型，用于创建棋盘格效果
+    material: Cesium.Material.fromType("Checkerboard", {
+      evenColor: Cesium.Color.WHITE,
+      oddColor: Cesium.Color.BLUE,
+      repeat: new Cesium.Cartesian2(10, 10),
+    }),
+    aboveGround: true,
+  });
+
+  // 4. 创建图元
+  const primitive = new Cesium.Primitive({
+    geometryInstances: [instance],
+    appearance: appearance,
+    releaseGeometryInstances: false,
+    compressVertices: true, // 顶点压缩优化
+  });
+
+  viewer.scene.primitives.add(primitive);
+  viewer.camera.flyTo({
+    destination: Cesium.Rectangle.fromDegrees(116.3, 39.8, 116.5, 40.19),
+    orientation: {
+      heading: Cesium.Math.toRadians(0),
+      pitch: Cesium.Math.toRadians(-90),
+      roll: 0,
+    },
+  });
+});
+
+// 加载天地图
+const initMap = () => {
+  // 以下为天地图及天地图标注加载
+  const tiandituProvider = new Cesium.WebMapTileServiceImageryProvider({
+    url:
+      "http://{s}.tianditu.gov.cn/img_w/wmts?service=wmts&request=GetTile&version=1.0.0&LAYER=img&tileMatrixSet=w&TileMatrix={TileMatrix}&TileRow={TileRow}&TileCol={TileCol}&style=default&format=tiles&tk=" +
+      token,
+    layer: "img",
+    style: "default",
+    format: "tiles",
+    tileMatrixSetID: "w",
+    subdomains: ["t0", "t1", "t2", "t3", "t4", "t5", "t6", "t7"], // 子域名
+    maximumLevel: 18,
+    credit: new Cesium.Credit("天地图影像"),
+  });
+  // 天地图影像添加到viewer实例的影像图层集合中
+  viewer.imageryLayers.addImageryProvider(tiandituProvider);
+};
+</script>
+<style scoped>
+.container {
+  width: 60vw;
+  height: 60vh;
+}
+</style>

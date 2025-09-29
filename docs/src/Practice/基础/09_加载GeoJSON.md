@@ -113,4 +113,9 @@ const initMap = () => {
 
 :::
 
-![GeoJson数据添加](../../Aassets/Basics/03_添加GeoJSon.png)
+<Demo />
+<script setup>
+import Demo from '@/Components/基础/09_加载GeoJSON.vue'
+</script>
+
+<!-- ![GeoJson数据添加](../../Aassets/Basics/03_添加GeoJSon.png) -->

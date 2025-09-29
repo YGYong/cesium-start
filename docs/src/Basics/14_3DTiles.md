@@ -1,4 +1,4 @@
-# 3D Tiles 大规模三维地理空间数据的开放标准
+# 3D Tiles 大规模三维地理空间数据
 
 ## 什么是 3D Tiles？
 
@@ -7,7 +7,9 @@
 - 它把庞大的 3D 模型切成小块（瓦片）
 - 只加载你当前能看到的部分
 - 当你移动时，动态加载新区域
-- 离得远时显示简化版，离得近时显示精细版可以参考 [3D Tiles 官方文档](https://github.com/CesiumGS/3d-tiles/tree/main/specification)。
+- 离得远时显示简化版，离得近时显示精细版
+
+[3D Tiles 官方介绍](https://github.com/CesiumGS/3d-tiles/tree/main/specification)。
 
 ### 核心优势
 
@@ -18,24 +20,6 @@
 | **流式传输**   | 按需加载可见区域数据             | 降低初始加载时间   |
 | **语义元数据** | 保留要素级属性信息               | 支持交互查询与分析 |
 | **格式开放**   | 基于 glTF 标准，兼容主流 3D 生态 | 确保长期可访问性   |
-
-### 应用场景
-
-- **城市建模**：加载百万级建筑模型
-- **地理信息**：融合地形、影像与矢量数据
-- **工程 BIM**：展示精细建筑构件与属性
-- **文化遗产**：数字化文物与遗址保护
-- **工业仿真**：工厂布局与设备管理
-- **元宇宙**：构建大规模虚拟空间
-
-### 与传统 3D 格式对比
-
-| 格式        | 优势                         | 劣势                   | 适用场景           |
-| ----------- | ---------------------------- | ---------------------- | ------------------ |
-| 3D Tiles    | 流式加载、LOD 管理、空间索引 | 规范复杂、生成工具依赖 | 大规模地理空间数据 |
-| glTF/GLB    | 轻量高效、生态成熟           | 无内置 LOD 和空间索引  | 单一场景模型       |
-| OBJ/FBX     | 兼容性广、工具支持好         | 体积大、不支持流式     | 小型模型交换       |
-| Point Cloud | 点云数据原生支持             | 可视化效果有限         | 激光扫描数据       |
 
 ## 数据规范与结构
 
@@ -51,9 +35,11 @@
 
 2. **瓦片内容文件** - 实际 3D 数据
 
-   - glTF/GLB 模型
-   - 点云数据(.pnts)
-   - 复合瓦片(.cmpt)
+   - .b3dm：批量 3D 模型
+   - .i3dm：实例化 3D 模型
+   - .pnts：点云数据
+   - .cmpt：复合瓦片
+   - .gltf/.glb：通用 3D 模型
 
 3. **元数据文件** - 属性定义与数据
    - 模式定义(schema.json)
@@ -113,6 +99,10 @@ let viewer = null;
 // 天地图TOKEN
 const token = "05be06461004055923091de7f3e51aa6";
 
+// 设置访问令牌
+Cesium.Ion.defaultAccessToken =
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiIwZTEwODgwMS1iYTY0LTRhNmYtYWFhMS03MDEzMjlhYWNjOTciLCJpZCI6MzAwMTM5LCJpYXQiOjE3NDY1ODI5MTR9.P4bdCMYyoubNMaQ_-ZkU99mM8Da3o8HIo4A57stHRAg";
+
 onMounted(async () => {
   // 初始化Viewer
   viewer = new Cesium.Viewer(cesiumContainer.value, {
@@ -128,6 +118,7 @@ onMounted(async () => {
   });
   // 清空logo
   viewer.cesiumWidget.creditContainer.style.display = "none";
+  initMap();
 
   // 添加OSM建筑物数据
   const tileset = await Cesium.createOsmBuildingsAsync();
@@ -141,8 +132,6 @@ onMounted(async () => {
       roll: Cesium.Math.toRadians(0),
     },
   });
-
-  initMap();
 });
 
 // 加载天地图
@@ -155,29 +144,13 @@ const initMap = () => {
     layer: "img",
     style: "default",
     format: "tiles",
-    tileMatrixSetID: "w", // 天地图使用 Web 墨卡托投影（EPSG:3857），需确保 tileMatrixSetID: "w"
-    subdomains: ["t0", "t1", "t2", "t3", "t4", "t5", "t6", "t7"], // 子域名
-    maximumLevel: 18,
-    credit: new Cesium.Credit("天地图影像"),
-  });
-
-  // 添加地理标注
-  const labelProvider = new Cesium.WebMapTileServiceImageryProvider({
-    url:
-      "http://{s}.tianditu.gov.cn/cia_w/wmts?service=wmts&request=GetTile&version=1.0.0&LAYER=cia&tileMatrixSet=w&tileMatrix={TileMatrix}&tileRow={TileRow}&tileCol={TileCol}&style=default&format=tiles&tk=" +
-      token,
-    layer: "img",
-    style: "default",
-    format: "tiles",
     tileMatrixSetID: "w",
-    subdomains: ["t0", "t1", "t2", "t3", "t4", "t5", "t6", "t7"], // 子域名轮询
+    subdomains: ["t0", "t1", "t2", "t3", "t4", "t5", "t6", "t7"], // 子域名
     maximumLevel: 18,
     credit: new Cesium.Credit("天地图影像"),
   });
   // 天地图影像添加到viewer实例的影像图层集合中
   viewer.imageryLayers.addImageryProvider(tiandituProvider);
-  // 天地图地理标注（后添加的会覆盖前面的）
-  viewer.imageryLayers.addImageryProvider(labelProvider);
 };
 </script>
 <style scoped>
@@ -231,7 +204,7 @@ onMounted(async () => {
     new URL("./models/Tileset/tileset.json", import.meta.url).href,
     {
       maximumScreenSpaceError: 16, // 最大屏幕空间误差
-      maximumMemoryUsage: 512, // 最大内存使用量
+      maximumCacheOverflowBytes: 536870912, // 最大缓存溢出字节数
       skipLevelOfDetail: true, // 跳过细节层级
       dynamicScreenSpaceError: true, // 动态屏幕空间误差
       dynamicScreenSpaceErrorDensity: 0.001, // 动态屏幕空间误差密度
@@ -255,32 +228,26 @@ onMounted(async () => {
 
 ### 关键配置参数
 
-| 参数                      | 类型    | 默认值 | 说明               | 性能影响 |
-| ------------------------- | ------- | ------ | ------------------ | -------- |
-| `maximumScreenSpaceError` | Number  | 16     | 最大屏幕空间误差   | 高       |
-| `maximumMemoryUsage`      | Number  | 512    | 最大内存使用(MB)   | 中       |
-| `skipLevelOfDetail`       | Boolean | false  | 是否跳过中间 LOD   | 高       |
-| `dynamicScreenSpaceError` | Boolean | false  | 动态误差计算       | 中       |
-| `cullWithChildrenBounds`  | Boolean | true   | 使用子瓦片边界剔除 | 中       |
-| `preloadAncestors`        | Boolean | true   | 预加载父瓦片       | 低       |
-| `preloadSiblings`         | Boolean | false  | 预加载兄弟瓦片     | 高       |
+| 参数                        | 类型    | 默认值    | 说明               | 性能影响 |
+| --------------------------- | ------- | --------- | ------------------ | -------- |
+| `maximumScreenSpaceError`   | Number  | 16        | 最大屏幕空间误差   | 高       |
+| `maximumCacheOverflowBytes` | Number  | 536870912 | 最大缓存溢出字节数 | 中       |
+| `skipLevelOfDetail`         | Boolean | false     | 是否跳过中间 LOD   | 高       |
+| `dynamicScreenSpaceError`   | Boolean | false     | 动态误差计算       | 中       |
+| `cullWithChildrenBounds`    | Boolean | true      | 使用子瓦片边界剔除 | 中       |
+| `preferLeaves`              | Boolean | false     | 优先加载细节瓦片   | 高       |
+| `loadSiblings`              | Boolean | false     | 预加载兄弟瓦片     | 高       |
+| `cullWithChildrenBounds`    | Boolean | true      | 使用子瓦片边界剔除 | 中       |
 
 ### 加载状态监听
 
 ```js
 // 监听加载进度
-tileset.loadProgress.addEventListener(function (
-  numberOfPendingRequests,
-  numberOfTilesProcessing
-) {
-  if (numberOfPendingRequests === 0 && numberOfTilesProcessing === 0) {
-    console.log("Stopped loading");
-    return;
+tileset.loadProgress.addEventListener((pending, processing) => {
+  console.log(pending, processing, "tileset.totalTilesCount");
+  if (pending === 0 && processing === 0) {
+    console.log("瓦片集加载完成");
   }
-
-  console.log(
-    `Loading: requests: ${numberOfPendingRequests}, processing: ${numberOfTilesProcessing}`
-  );
 });
 ```
 
@@ -315,7 +282,7 @@ viewer.extend(Cesium.viewerCesium3DTilesInspectorMixin);
 
 #### 样式表达与可视化
 
-文档: [Cesium3DTileStyle](https://cesium.com/learn/cesiumjs/ref-doc/Cesium3DTileStyle.html?classFilter=Cesium3DTileStyle)
+3DTiles 支持强大的样式表达能力，可基于要素属性动态调整外观，[Cesium3DTileStyle 文档](https://cesium.com/learn/cesiumjs/ref-doc/Cesium3DTileStyle.html?classFilter=Cesium3DTileStyle)
 
 ```js
 tileset.style = new Cesium.Cesium3DTileStyle({
@@ -331,3 +298,9 @@ tileset.style = new Cesium.Cesium3DTileStyle({
 ```
 
 ![3D Tiles 样式](../Aassets/Basics/tiles2.png)
+
+## 浅谈
+
+> 记得设置`Cesium.Ion`
+
+工作中还真没有加载过 3D Tiles 数据集，拿一个官网的例子简单介绍一下基本使用

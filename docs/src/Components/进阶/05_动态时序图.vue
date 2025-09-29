@@ -1,0 +1,223 @@
+<template>
+  <div class="container">
+    <div ref="cesiumContainer" class="container-map"></div>
+    <div class="container-button">
+      <button @click="openTimeMap()">开启</button>
+      <button @click="closeTimeMap()">关闭</button>
+    </div>
+  </div>
+</template>
+
+<script setup>
+import { ref, onMounted } from "vue";
+import * as Cesium from "cesium";
+import img1 from "./timeMap/20200522145400_20200522145400_0c972b7abe4f4b4fbdbe909f5c1ca17a.png";
+import img2 from "./timeMap/20200522145400_20200522150000_55c4adac7ac8460db3d893866897bd6d.png";
+import img3 from "./timeMap/20200522145400_20200522150600_ca075253d90e40049f069d22a1a3ce3d.png";
+import img4 from "./timeMap/20200522145400_20200522151200_afe188f5892d4dd8a4d09d94c746ce1f.png";
+import img5 from "./timeMap/20200522145400_20200522151800_b10b132f2d52424e9ab55a61896e86b0.png";
+import img6 from "./timeMap/20200522145400_20200522152400_4ad54289d6f64f5aaa160f453a99b14a.png";
+import img7 from "./timeMap/20200522145400_20200522153000_cf72453eba0b4b33966f69899771ba16.png";
+import img8 from "./timeMap/20200522145400_20200522153600_c3aac59805ec433bae08bc8d77d25d20.png";
+import img9 from "./timeMap/20200522145400_20200522154200_42a885bb66144e698190c38d02b3be96.png";
+import img10 from "./timeMap/20200522145400_20200522154800_4564689c557e43ff993ad0113363bd6d.png";
+import img11 from "./timeMap/20200522145400_20200522155400_4742e31563464542a533a43d5414a7ae.png";
+import img12 from "./timeMap/20200522145400_20200522160000_487da64a0f384795848e60f2ed343500.png";
+import img13 from "./timeMap/20200522145400_20200522160600_9a1cf5da2f2c46158f113c057b9bb079.png";
+import img14 from "./timeMap/20200522145400_20200522161200_76861453df20413fa1eff57c8c938758.png";
+import img15 from "./timeMap/20200522145400_20200522161800_767d25a128e94d968522badfaf071a66.png";
+import img16 from "./timeMap/20200522145400_20200522162400_8b949a9d47fd4f289bd51afe9e009ab9.png";
+import img17 from "./timeMap/20200522145400_20200522163000_9f234335ae2c42ac91d5dfc62b72f3db.png";
+import img18 from "./timeMap/20200522145400_20200522163600_a808919c4a5a4142b188520a74dacf75.png";
+import img19 from "./timeMap/20200522145400_20200522164200_248688f96cfd438eb5229812dfb748c3.png";
+import img20 from "./timeMap/20200522145400_20200522164800_797dd13e0a304fbe934fee1902b7fc21.png";
+import img21 from "./timeMap/20200522145400_20200522165400_0be5ef511d6c467288ec9f7b961821bd.png";
+import img22 from "./timeMap/20200522145400_20200522170000_a1820b8d4527467a85db7fee3b352bbb.png";
+import img23 from "./timeMap/20200522145400_20200522170600_964ada943fcf4a13aa59364b1efd0b1b.png";
+
+const cesiumContainer = ref(null);
+let viewer = null;
+
+const arrTileLayer = [];
+let mapTimer = null;
+let currentTimeMapIndex = 0;
+
+// 天地图TOKEN
+const token = "2b34f6afbcd235c2bc4bed3f7735f1f5";
+
+onMounted(() => {
+  // 初始化Viewer
+  viewer = new Cesium.Viewer(cesiumContainer.value, {
+    geocoder: false, // 关闭地理编码搜索
+    homeButton: false, // 关闭主页按钮
+    sceneModePicker: false, // 关闭场景模式选择器
+    baseLayerPicker: false, // 关闭底图选择器
+    navigationHelpButton: false, // 关闭导航帮助
+    animation: false, // 关闭动画控件
+    timeline: false, // 关闭时间轴
+    fullscreenButton: false, // 关闭全屏按钮
+    baseLayer: false, // 关闭默认地图
+  });
+  // 清空logo
+  viewer.cesiumWidget.creditContainer.style.display = "none";
+
+  initMap();
+
+  // 动态时序图
+  viewer.camera.flyTo({
+    destination: Cesium.Cartesian3.fromDegrees(
+      110.511154,
+      29.362943,
+      5531517.4
+    ),
+    duration: 2,
+    orientation: {
+      heading: Cesium.Math.toRadians(348.3), // 水平旋转，围绕Y轴，0为正北方向
+      pitch: Cesium.Math.toRadians(-89.8), // 上下旋转，围绕X轴，-90为俯视地面
+      roll: 0.0, // 视口的翻滚角度，围绕Z轴，0为不翻转
+    },
+  });
+
+  // 注意这里要在天地图加载后再初始化时序图，否则天地图会覆盖我们的时序图
+  initTimeMap();
+});
+
+// 开启
+const openTimeMap = () => {
+  closeTimeMap();
+  mapTimer = setInterval(() => {
+    if (currentTimeMapIndex > arrTileLayer.length) {
+      currentTimeMapIndex = 0;
+    }
+    currentTimeMapIndex++;
+
+    const layer1 = arrTileLayer[currentTimeMapIndex - 1];
+    if (layer1) {
+      layer1.alpha = 0;
+    }
+    const layer2 = arrTileLayer[currentTimeMapIndex];
+    if (layer2) {
+      layer2.alpha = 1;
+    }
+  }, 300);
+};
+// 关闭
+const closeTimeMap = () => {
+  clearInterval(mapTimer);
+  try {
+    arrTileLayer[currentTimeMapIndex].alpha = 0;
+    currentTimeMapIndex = 0;
+  } catch (error) {}
+};
+const initTimeMap = () => {
+  const urlArr = [
+    img1,
+    img2,
+    img3,
+    img4,
+    img5,
+    img6,
+    img7,
+    img8,
+    img9,
+    img10,
+    img11,
+    img12,
+    img13,
+    img14,
+    img15,
+    img16,
+    img17,
+    img18,
+    img19,
+    img20,
+    img21,
+    img22,
+    img23,
+  ];
+
+  for (let i = 0, len = urlArr.length; i < len; i++) {
+    var imageryProvider = new Cesium.SingleTileImageryProvider({
+      url: urlArr[i],
+      rectangle: Cesium.Rectangle.fromDegrees(
+        63.8148899733,
+        12.7700338517,
+        143.536486117,
+        56.3833398551
+      ),
+      tileWidth: 0,
+      tileHeight: 0,
+    });
+
+    let options = {
+      alpha: 0,
+    };
+    var imageryLayer = new Cesium.ImageryLayer(imageryProvider, options);
+    viewer.imageryLayers.add(imageryLayer);
+
+    arrTileLayer.push(imageryLayer);
+  }
+
+  openTimeMap();
+};
+
+// 加载天地图
+const initMap = () => {
+  // 以下为天地图及天地图标注加载
+  const tiandituProvider = new Cesium.WebMapTileServiceImageryProvider({
+    url:
+      "http://{s}.tianditu.gov.cn/img_w/wmts?service=wmts&request=GetTile&version=1.0.0&LAYER=img&tileMatrixSet=w&TileMatrix={TileMatrix}&TileRow={TileRow}&TileCol={TileCol}&style=default&format=tiles&tk=" +
+      token,
+    layer: "img",
+    style: "default",
+    format: "tiles",
+    tileMatrixSetID: "w",
+    subdomains: ["t0", "t1", "t2", "t3", "t4", "t5", "t6", "t7"], // 子域名
+    maximumLevel: 18,
+    credit: new Cesium.Credit("天地图影像"),
+  });
+
+  // 添加地理标注
+  const labelProvider = new Cesium.WebMapTileServiceImageryProvider({
+    url:
+      "http://{s}.tianditu.gov.cn/cia_w/wmts?service=wmts&request=GetTile&version=1.0.0&LAYER=cia&tileMatrixSet=w&tileMatrix={TileMatrix}&tileRow={TileRow}&tileCol={TileCol}&style=default&format=tiles&tk=" +
+      token,
+    layer: "img",
+    style: "default",
+    format: "tiles",
+    tileMatrixSetID: "w",
+    subdomains: ["t0", "t1", "t2", "t3", "t4", "t5", "t6", "t7"], // 子域名轮询
+    maximumLevel: 18,
+    credit: new Cesium.Credit("天地图影像"),
+  });
+  // 天地图影像添加到viewer实例的影像图层集合中
+  viewer.imageryLayers.addImageryProvider(tiandituProvider);
+  // 天地图地理标注（后添加的会覆盖前面的）
+  viewer.imageryLayers.addImageryProvider(labelProvider);
+};
+</script>
+<style scoped>
+.container {
+  position: relative;
+  overflow: hidden;
+  width: 60vw;
+  height: 60vh;
+}
+.container-map {
+  width: 100%;
+  height: 100%;
+}
+.container-button {
+  position: absolute;
+  left: 20px;
+  top: 20px;
+  z-index: 1000;
+  display: flex;
+  gap: 10px;
+}
+button {
+  background-color: #000;
+  padding: 2px 15px;
+  border-radius: 5px;
+}
+</style>
