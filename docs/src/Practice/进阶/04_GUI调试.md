@@ -33,6 +33,7 @@ const gui = new dat.GUI();
 </template>
 
 <script setup>
+import { ClientOnly } from 'vitepress'
 import { ref, onMounted } from "vue";
 import * as Cesium from "cesium";
 import * as dat from "dat.gui";
@@ -203,10 +204,17 @@ const initMap = () => {
 
 :::
 
-<!-- <ClientOnly>
+<ClientOnly>
   <Demo />
 </ClientOnly>
 
 <script setup>
-import Demo from '@/Components/进阶/04_GUI调试.vue'
-</script> -->
+import { ref, onMounted } from 'vue'
+
+// 只在客户端导入组件
+const Demo = ref(null)
+onMounted(async () => {
+  const demoModule = await import('@/Components/进阶/04_GUI调试.vue')
+  Demo.value = demoModule.default
+})
+</script>

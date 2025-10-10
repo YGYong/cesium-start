@@ -353,7 +353,8 @@ export default defineConfig({
     },
     ssr: {
       // 完全禁用这些依赖的 SSR
-      external: []
+      external: ['cesium', 'cesium-navigation-es6', 'dat.gui'],
+      noExternal: []
     }
   },
   // 添加构建配置以避免 SSR 问题
