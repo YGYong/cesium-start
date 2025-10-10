@@ -36,7 +36,7 @@ export default defineConfig({
       // {
       //   text: "官网更新日志",
       //   link: "/UpdateLog/cesiumlog.md",
-      // },
+      //   },
       {
         text: "赞助",
         link: "/Sponsor/赞助.md",
@@ -343,11 +343,25 @@ export default defineConfig({
     },
   },
   vite: {
-    plugins: [cesium()],
+    plugins: [
+      cesium()
+    ],
     resolve: {
       alias: {
         "@": resolve(__dirname, ".", "../src/"),
       },
     },
+    ssr: {
+      // 完全禁用这些依赖的 SSR
+      external: []
+    }
   },
+  // 添加构建配置以避免 SSR 问题
+  vue: {
+    template: {
+      compilerOptions: {
+        isCustomElement: (tag) => tag.startsWith('cesium-')
+      }
+    }
+  }
 });

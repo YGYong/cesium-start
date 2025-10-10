@@ -127,7 +127,10 @@ const initMap = () => {
 
 :::
 
-<Demo />
+<ClientOnly>
+  <Demo />
+</ClientOnly>
+
 <script setup>
 import Demo from "@/Components/基础/56_CZML.vue";
 </script>

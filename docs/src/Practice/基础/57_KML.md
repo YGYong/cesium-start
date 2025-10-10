@@ -77,7 +77,10 @@ const initMap = () => {
 
 :::
 
-<Demo />
+<ClientOnly>
+  <Demo />
+</ClientOnly>
+
 <script setup>
 import Demo from "@/Components/基础/57_KML.vue";
 </script>

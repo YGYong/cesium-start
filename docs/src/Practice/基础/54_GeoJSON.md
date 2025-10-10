@@ -99,7 +99,10 @@ const initMap = () => {
 
 :::
 
-<Demo />
+<ClientOnly>
+  <Demo />
+</ClientOnly>
+
 <script setup>
 import Demo from "@/Components/基础/54_GeoJSON.vue";
 </script>

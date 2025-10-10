@@ -203,7 +203,10 @@ const initMap = () => {
 
 :::
 
-<Demo />
+<!-- <ClientOnly>
+  <Demo />
+</ClientOnly>
+
 <script setup>
 import Demo from '@/Components/进阶/04_GUI调试.vue'
-</script>
+</script> -->
