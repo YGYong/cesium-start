@@ -204,7 +204,7 @@ const initMap = () => {
 
 :::
 
-<ClientOnly>
+<!-- <ClientOnly>
   <Demo />
 </ClientOnly>
 
@@ -217,4 +217,4 @@ onMounted(async () => {
   const demoModule = await import('@/Components/进阶/04_GUI调试.vue')
   Demo.value = demoModule.default
 })
-</script>
+</script> -->

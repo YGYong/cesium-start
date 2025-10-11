@@ -2,6 +2,8 @@
 
 以下为一个简单的 GeoJson 示例
 
+![GeoJson数据添加](../../Aassets/Basics/03_添加GeoJSon.png)
+
 ```js
 // 模拟一个GeoJson数据
 const geojson = {
@@ -113,12 +115,10 @@ const initMap = () => {
 
 :::
 
-<ClientOnly>
+<!-- <ClientOnly>
   <Demo />
 </ClientOnly>
 
 <script setup>
 import Demo from '@/Components/基础/09_加载GeoJSON.vue'
-</script>
-
-<!-- ![GeoJson数据添加](../../Aassets/Basics/03_添加GeoJSon.png) -->
+</script> -->

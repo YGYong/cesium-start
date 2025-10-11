@@ -112,10 +112,10 @@ const initMap = () => {
 
 :::
 
-<ClientOnly>
+<!-- <ClientOnly>
   <Demo />
 </ClientOnly>
 
 <script setup>
 import Demo from '@/Components/基础/48_PerInstanceColorAppearance.vue'
-</script>
+</script> -->
