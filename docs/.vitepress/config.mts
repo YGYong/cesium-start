@@ -37,10 +37,10 @@ export default defineConfig({
       //   text: "官网更新日志",
       //   link: "/UpdateLog/cesiumlog.md",
       //   },
-      {
-        text: "赞助",
-        link: "/Sponsor/赞助.md",
-      },
+      // {
+      //   text: "赞助",
+      //   link: "/Sponsor/赞助.md",
+      // },
       {
         text: "相关社区",
         items: [
@@ -54,7 +54,7 @@ export default defineConfig({
           },
           {
             text: "Cesium Demo",
-            link: "https://sandcastle.cesium.com/index.html?src=3D%20Models.html&label=All",
+            link: "https://sandcastle.cesium.com/",
           },
           {
             text: "3D模型",
