@@ -312,6 +312,7 @@ export default defineConfig({
                 { text: "GUI调试", link: "/Practice/进阶/04_GUI调试.md" },
                 { text: "动态时序图", link: "/Practice/进阶/05_动态时序图.md" },
                 { text: "沿线标注", link: "/Practice/进阶/06_沿线标注.md" },
+                { text: "底肤换色", link: "/Practice/进阶/07_底肤换色.md" }
               ],
             },
           ],
