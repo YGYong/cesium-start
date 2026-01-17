@@ -312,7 +312,11 @@ export default defineConfig({
                 { text: "GUI调试", link: "/Practice/进阶/04_GUI调试.md" },
                 { text: "动态时序图", link: "/Practice/进阶/05_动态时序图.md" },
                 { text: "沿线标注", link: "/Practice/进阶/06_沿线标注.md" },
-                { text: "底肤换色", link: "/Practice/进阶/07_底肤换色.md" }
+                { text: "底肤换色", link: "/Practice/进阶/07_底肤换色.md" },
+                {
+                  text: "肤色主题切换",
+                  link: "/Practice/进阶/08_肤色主题切换.md",
+                },
               ],
             },
           ],
@@ -344,9 +348,7 @@ export default defineConfig({
     },
   },
   vite: {
-    plugins: [
-      cesium()
-    ],
+    plugins: [cesium()],
     resolve: {
       alias: {
         "@": resolve(__dirname, ".", "../src/"),
@@ -354,16 +356,16 @@ export default defineConfig({
     },
     ssr: {
       // 完全禁用这些依赖的 SSR
-      external: ['cesium', 'cesium-navigation-es6', 'dat.gui'],
-      noExternal: []
-    }
+      external: ["cesium", "cesium-navigation-es6", "dat.gui"],
+      noExternal: [],
+    },
   },
   // 添加构建配置以避免 SSR 问题
   vue: {
     template: {
       compilerOptions: {
-        isCustomElement: (tag) => tag.startsWith('cesium-')
-      }
-    }
-  }
+        isCustomElement: (tag) => tag.startsWith("cesium-"),
+      },
+    },
+  },
 });
