@@ -317,6 +317,10 @@ export default defineConfig({
                   text: "肤色主题切换",
                   link: "/Practice/进阶/08_肤色主题切换.md",
                 },
+                {
+                  text: "可视化点位",
+                  link: "/Practice/进阶/09_点位可视化.md",
+                }
               ],
             },
           ],
