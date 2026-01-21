@@ -320,7 +320,11 @@ export default defineConfig({
                 {
                   text: "可视化点位",
                   link: "/Practice/进阶/09_点位可视化.md",
-                }
+                },
+                {
+                  text: "防御圈雷达扫描",
+                  link: "/Practice/进阶/10_雷达扫描.md",
+                },
               ],
             },
           ],
